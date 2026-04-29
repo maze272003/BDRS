@@ -1,0 +1,98 @@
+x-vite-build-args: &vite-build-args
+  - VITE_APP_NAME
+  - VITE_REVERB_APP_KEY
+  - VITE_REVERB_HOST
+  - VITE_REVERB_PORT
+  - VITE_REVERB_SCHEME
+
+x-laravel-env: &laravel-env
+  - APP_NAME
+  - APP_ENV
+  - APP_KEY
+  - APP_DEBUG
+  - APP_URL
+  - LOG_CHANNEL
+  - LOG_LEVEL
+  - DB_CONNECTION
+  - DB_HOST
+  - DB_PORT
+  - DB_DATABASE
+  - DB_USERNAME
+  - DB_PASSWORD
+  - SESSION_DRIVER
+  - CACHE_STORE
+  - QUEUE_CONNECTION
+  - BROADCAST_CONNECTION
+  - REVERB_APP_ID
+  - REVERB_APP_KEY
+  - REVERB_APP_SECRET
+  - REVERB_HOST
+  - REVERB_PORT
+  - REVERB_SCHEME
+  - RUN_MIGRATIONS
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: *vite-build-args
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    environment: *laravel-env
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: *vite-build-args
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+    environment: *laravel-env
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: *vite-build-args
+    restart: unless-stopped
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    ports:
+      - "8080:8080"
+    environment: *laravel-env
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_ROOT_PASSWORD
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql-data:
+  storage:
