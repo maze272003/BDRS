@@ -75,7 +75,14 @@ class UserProfile extends Model
      */
     public function getFullAddressAttribute(): string
     {
-        return "{$this->street_address}, {$this->barangay}, {$this->city}, {$this->province}";
+        $parts = array_filter([
+            $this->street_address,
+            $this->barangay,
+            $this->city,
+            $this->province,
+        ], fn($value) => !empty($value));
+
+        return implode(', ', $parts);
     }
     
 }
