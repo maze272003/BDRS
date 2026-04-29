@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, router } from '@inertiajs/react';
 import Pagination from '@/Components/Pagination';
 import Footer from '@/Components/Residents/Footer';
+import { toast } from 'react-hot-toast';
 import { 
     FileText, History, Info, X, UploadCloud, CheckCircle2, 
     XCircle, Clock, LoaderCircle, ThumbsUp, Hourglass, HelpCircle, Ticket
@@ -155,6 +156,27 @@ export default function MyRequests({ auth, activeRequests, pastRequests }) {
     const { data, setData, post, processing, errors, reset, progress } = useForm({
         receipt: null,
     });
+
+    useEffect(() => {
+        if (window.Echo) {
+            const channel = window.Echo.private(`user-requests.${auth.user.id}`);
+            const reloadOptions = {
+                preserveState: true,
+                preserveScroll: true,
+                only: ['activeRequests', 'pastRequests'],
+            };
+
+            channel.listen('.StatusUpdated', (event) => {
+                toast.success(`Your request status has been updated to "${event.request.status}"!`);
+                router.reload(reloadOptions);
+            });
+
+            return () => {
+                channel.stopListening('.StatusUpdated');
+                window.Echo.leave(`user-requests.${auth.user.id}`);
+            };
+        }
+    }, [auth.user.id]);
 
     const openPaymentModal = (request) => {
         setSelectedRequest(request);

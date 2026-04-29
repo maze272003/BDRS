@@ -40,9 +40,9 @@ class DocumentRequestStatusUpdated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        // We use the same private channel as before
         return [
             new PrivateChannel('admin-requests'),
+            new PrivateChannel('user-requests.' . $this->documentRequest->user_id),
         ];
     }
 

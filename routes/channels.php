@@ -23,6 +23,10 @@ Broadcast::channel('admin-requests', function ($user) {
     return $user && ($user->can('be-admin') || $user->can('be-super-admin'));
 });
 
+Broadcast::channel('user-requests.{userId}', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
+});
+
 /**
  * Authorize that a user can listen to a specific conversation channel.
  */

@@ -177,5 +177,8 @@ class RequestDocumentsController extends Controller
             'admin_remarks' => $remarks,
             'processed_by' => auth()->id(),
         ]);
+
+        // 3. Dispatch event for real-time update
+        DocumentRequestStatusUpdated::dispatch($documentRequest);
     }
 }

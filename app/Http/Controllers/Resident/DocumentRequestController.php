@@ -203,9 +203,19 @@ class DocumentRequestController extends Controller
         }
 
         // 4. Save document request
+        $barangayId = $user->barangay_id;
+        if (!$barangayId && $user->profile && $user->profile->barangay) {
+            $barangay = \App\Models\Barangay::where('name', $user->profile->barangay)->first();
+            $barangayId = $barangay?->id;
+        }
+
+        if (!$barangayId) {
+            return back()->with('error', 'Unable to determine your barangay. Please contact support.');
+        }
+
         $newRequest = DocumentRequest::create([
             'user_id'          => $user->id,
-            'barangay_id'      => $user->barangay_id,
+            'barangay_id'      => $barangayId,
             'document_type_id' => $commonValidated['document_type_id'],
             'status'           => 'Pending',
             'form_data'        => $formData,
