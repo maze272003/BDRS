@@ -142,7 +142,10 @@ export default function BrgyBusinessPermit({ auth, userProfile, documentType }) 
                                 <h4 className="text-base font-semibold text-slate-800 dark:text-slate-200 mb-4">Owner's Information</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <ReadOnlyField label="Owner's Full Name" value={ownerFullName} icon={Home} />
-                                    <ReadOnlyField label="Owner's Address" value={userProfile?.address || 'N/A'} icon={Home} />
+                                    
+                                    {/* --- MODIFIED LINE --- */}
+                                    <ReadOnlyField label="Owner's Address" value={userProfile?.full_address || 'N/A'} icon={Home} />
+                                    
                                 </div>
                             </CardContent>
 

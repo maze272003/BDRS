@@ -4,15 +4,17 @@ import { Head, usePage, router, Link } from '@inertiajs/react';
 import { toast } from 'react-toastify';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
-import EditUserModal from '@/components/EditUserModal';
-import VerificationModal from '@/components/VerificationModal';
-import { CheckCircle, Clock, XCircle, Edit, HelpCircle } from 'lucide-react';
+// Ensure this file exists at resources/js/components/EditUserModal.jsx (Case Sensitive!)
+import EditUserModal from '@/Components/EditUserModal'; 
+import VerificationModal from '@/Components/VerificationModal';
+import { CheckCircle, Clock, XCircle, Edit, HelpCircle, Loader2 } from 'lucide-react';
 
 const roleBadgeClasses = {
     resident: 'bg-blue-50 text-blue-600 ring-blue-500/10',
     admin: 'bg-indigo-50 text-indigo-600 ring-indigo-500/10',
     super_admin: 'bg-red-50 text-red-600 ring-red-500/10',
 };
+
 const verificationBadgeClasses = {
     verified: 'bg-green-100 text-green-800',
     rejected: 'bg-red-100 text-red-800',
@@ -22,11 +24,8 @@ const verificationBadgeClasses = {
 
 const LoadingSpinner = () => (
     <div className="flex items-center space-x-2 text-blue-500">
-        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>Updating...</span>
+        <Loader2 className="animate-spin h-4 w-4" />
+        <span className="text-xs">Updating...</span>
     </div>
 );
 
@@ -52,7 +51,6 @@ const VerificationStatusBadge = ({ status }) => {
     );
 };
 
-
 export default function UserManagement({ auth, users: initialUsers, filters }) {
     const { flash } = usePage().props;
     const [localUsers, setLocalUsers] = useState(initialUsers.data);
@@ -72,6 +70,9 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
         sortBy: filters.sortBy || 'created_at',
         sortOrder: filters.sortOrder || 'desc',
     });
+
+    // Helper to check permissions (Admin OR Super Admin)
+    const hasWriteAccess = ['admin', 'super_admin'].includes(auth.user.role);
 
     const startTour = () => {
         const driverObj = driver({
@@ -187,9 +188,7 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                         className="flex items-center gap-1 p-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                         aria-label="Start tour"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5L7 9.167A1 1 0 007 10.833L9.133 13.5a1 1 0 001.734 0L13 10.833A1 1 0 0013 9.167L10.867 6.5A1 1 0 0010 7z" clipRule="evenodd" />
-                                        </svg>
+                                        <HelpCircle size={20} />
                                         <span className="hidden sm:inline text-xs">Need Help?</span>
                                     </button>
                                 </div>
@@ -210,13 +209,13 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                 <table className="min-w-full responsive-table">
                                     <thead className="bg-blue-600 text-white">
                                         <tr>
-                                            <th scope="col" onClick={() => handleSort('full_name')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer">Name</th>
-                                            <th scope="col" onClick={() => handleSort('email')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer">Email</th>
+                                            <th scope="col" onClick={() => handleSort('full_name')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Name</th>
+                                            <th scope="col" onClick={() => handleSort('email')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Email</th>
                                             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Role</th>
-                                            <th scope="col" onClick={() => handleSort('created_at')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer">Registered On</th>
+                                            <th scope="col" onClick={() => handleSort('created_at')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Registered On</th>
                                             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Verification</th>
-                                            {/* CORRECTED: Show Actions header ONLY for admin */}
-                                            {auth.user.role === 'admin' && (
+                                            {/* Show Actions header for Admin AND Super Admin */}
+                                            {hasWriteAccess && (
                                                 <th scope="col" className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider">Actions</th>
                                             )}
                                         </tr>
@@ -224,20 +223,24 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                     <tbody className="bg-white">
                                         {localUsers.length > 0 ? (
                                             localUsers.map((user) => (
-                                                <tr key={user.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
+                                                <tr key={user.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-50 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
                                                     <td data-label="Name" className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.full_name}</td>
                                                     <td data-label="Email" className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
                                                     <td data-label="Role" className="px-6 py-4 whitespace-nowrap text-sm">
                                                         {updatingUserRole === user.id ? <LoadingSpinner /> : (
                                                             <>
-                                                                {/* CORRECTED: Show dropdown for super_admin */}
+                                                                {/* Super Admin can change roles for non-super-admins */}
                                                                 {auth.user.role === 'super_admin' ? (
-                                                                    <select value={user.role} onChange={(e) => handleRoleChange(e, user)} className={`block w-auto rounded-md px-3 py-1 text-xs font-medium border-0 focus:ring-2 focus:ring-blue-500 ${roleBadgeClasses[user.role]}`} disabled={user.id === auth.user.id || user.role === 'super_admin'}>
+                                                                    <select 
+                                                                        value={user.role} 
+                                                                        onChange={(e) => handleRoleChange(e, user)} 
+                                                                        className={`block w-auto rounded-md px-3 py-1 text-xs font-medium border-0 focus:ring-2 focus:ring-blue-500 cursor-pointer ${roleBadgeClasses[user.role]}`} 
+                                                                        disabled={user.id === auth.user.id || user.role === 'super_admin'}
+                                                                    >
                                                                         <option value="resident">Resident</option>
                                                                         <option value="admin">Admin</option>
                                                                     </select>
                                                                 ) : (
-                                                                    // CORRECTED: Show static badge for admin
                                                                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${roleBadgeClasses[user.role]}`}>
                                                                         {user.role}
                                                                     </span>
@@ -248,13 +251,23 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                                     <td data-label="Registered On" className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{new Date(user.created_at).toLocaleDateString()}</td>
                                                     <td data-label="Verification" className="px-6 py-4 whitespace-nowrap text-sm"><VerificationStatusBadge status={user.verification_status} /></td>
                                                     
-                                                    {/* CORRECTED: Show Actions cell ONLY for admin */}
-                                                    {auth.user.role === 'admin' && (
+                                                    {/* Actions cell for Admin AND Super Admin */}
+                                                    {hasWriteAccess && (
                                                         <td data-label="Actions" className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                             <div className="flex items-center justify-end space-x-2">
-                                                                {/* Buttons for admin */}
-                                                                <button onClick={() => handleOpenVerificationModal(user)} className="px-3 py-1.5 bg-yellow-500 text-white text-xs font-bold rounded-md hover:bg-yellow-600 transition-colors">Review</button>
-                                                                <button onClick={() => handleOpenEditModal(user)} className="flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-md hover:bg-blue-700 transition-colors"><Edit size={12} className="mr-1"/> Edit</button>
+                                                                <button 
+                                                                    onClick={() => handleOpenVerificationModal(user)} 
+                                                                    className="px-3 py-1.5 bg-yellow-500 text-white text-xs font-bold rounded-md hover:bg-yellow-600 transition-colors shadow-sm disabled:opacity-50"
+                                                                    disabled={updatingVerification === user.id}
+                                                                >
+                                                                    Review
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleOpenEditModal(user)} 
+                                                                    className="flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+                                                                >
+                                                                    <Edit size={12} className="mr-1"/> Edit
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     )}
@@ -262,8 +275,13 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                             ))
                                         ) : (
                                             <tr>
-                                                {/* CORRECTED: Dynamic colspan */}
-                                                <td colSpan={auth.user.role === 'admin' ? 6 : 5} className="px-6 py-12 text-center text-gray-500">No users found for the selected filters.</td>
+                                                <td colSpan={hasWriteAccess ? 6 : 5} className="px-6 py-12 text-center text-gray-500 bg-gray-50">
+                                                    <div className="flex flex-col items-center justify-center">
+                                                        <HelpCircle className="h-12 w-12 text-gray-300 mb-2" />
+                                                        <p className="text-lg font-medium text-gray-900">No users found</p>
+                                                        <p className="text-sm text-gray-500">Try adjusting your search or filters.</p>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -275,12 +293,12 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                     <>
                                         <div>Showing <span className="font-bold">{initialUsers.from}</span> to <span className="font-bold">{initialUsers.to}</span> of <span className="font-bold">{initialUsers.total}</span> results</div>
                                         {initialUsers.links && initialUsers.total > initialUsers.per_page && (
-                                            <div className="flex space-x-1">
+                                            <div className="flex flex-wrap gap-1">
                                                 {initialUsers.links.map((link, index) => (
                                                     link.url ? (
-                                                        <Link key={index} href={link.url} preserveState className={`px-3 py-1 rounded-md transition ${link.active ? 'bg-blue-600 text-white' : 'hover:bg-blue-500 hover:text-white'}`} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                                        <Link key={index} href={link.url} preserveState className={`px-3 py-1 rounded-md transition border ${link.active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`} dangerouslySetInnerHTML={{ __html: link.label }} />
                                                     ) : (
-                                                        <span key={index} className="px-3 py-1 rounded-md text-gray-400" dangerouslySetInnerHTML={{ __html: link.label }} />
+                                                        <span key={index} className="px-3 py-1 rounded-md text-gray-400 border border-gray-200 bg-gray-50" dangerouslySetInnerHTML={{ __html: link.label }} />
                                                     )
                                                 ))}
                                             </div>
@@ -295,4 +313,3 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
         </>
     );
 }
-

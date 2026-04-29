@@ -25,6 +25,18 @@ class UserProfileFactory extends Factory
             'birthday' => fake()->date(),
             'gender' => fake()->randomElement(['Male', 'Female']),
             'civil_status' => fake()->randomElement(['Single', 'Married', 'Widowed']),
+            'place_of_birth' => fake()->randomElement([
+            'Manila',
+            'Quezon City',
+            'Cebu City',
+            'Davao City',
+            'Baguio City',
+            'Iloilo City',
+            'Zamboanga City',
+            'Taguig City',
+            'Gapan City',
+            'San Fernando City',
+            ]),
         ];
     }
 }

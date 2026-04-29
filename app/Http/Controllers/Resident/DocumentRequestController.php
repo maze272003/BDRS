@@ -60,7 +60,7 @@ class DocumentRequestController extends Controller
         // Explicit mapping to ensure correct component paths
         $map = [
             'Brgy Business Permit' => 'BrgyBusinessPermit',
-            'Job Seeker'           => 'JobSeeker', // Added for Job Seeker
+            'Job Seeker'           => 'JobSeeker',
             'Barangay Clearance'   => 'BrgyClearance',
             'Certificate of Indigency' => 'GpIndigency',
             'Indigency'            => 'Indigency',
@@ -76,6 +76,17 @@ class DocumentRequestController extends Controller
         $viewPath = 'Residents/papers/' . $componentName;
 
         $userProfile = $user->profile;
+
+        // List of documents that need the full_address and full_name.
+        $docsNeedingProfileDetails = [
+            'Brgy Business Permit',
+            'Barangay Clearance'
+        ];
+        
+        if (in_array($documentType->name, $docsNeedingProfileDetails) && $userProfile) {
+            // Append an array of accessors for cleaner code
+            $userProfile->append(['full_name', 'full_address']);
+        }
 
         return Inertia::render($viewPath, [
             'documentType' => $documentType,
@@ -193,7 +204,8 @@ class DocumentRequestController extends Controller
 
         // 4. Save document request
         $newRequest = DocumentRequest::create([
-            'user_id'          => auth()->id(),
+            'user_id'          => $user->id,
+            'barangay_id'      => $user->barangay_id,
             'document_type_id' => $commonValidated['document_type_id'],
             'status'           => 'Pending',
             'form_data'        => $formData,

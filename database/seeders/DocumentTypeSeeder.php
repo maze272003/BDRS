@@ -18,7 +18,7 @@ class DocumentTypeSeeder extends Seeder
             ['name' => 'Solo Parent', 'description' => 'A certificate for Solo Parent.', 'template_path' => 'templates/akap.blade.php'],
             ['name' => 'Barangay Clearance', 'description' => 'A clearance from the barangay office.', 'template_path' => 'templates/brgy_clearance.blade.php'],
             ['name' => 'pwd', 'description' => 'A certificate for a Person with Disability.', 'template_path' => 'templates/pwd_certificate.blade.php'],
-            ['name' => 'GP Indigency', 'description' => 'A certificate of indigency for General Purposes.', 'template_path' => 'templates/gp_indigency.blade.php'],
+            // ['name' => 'GP Indigency', 'description' => 'A certificate of indigency for General Purposes.', 'template_path' => 'templates/gp_indigency.blade.php'],
             ['name' => 'Residency', 'description' => 'A certificate proving barangay residency.', 'template_path' => 'templates/cert_residency.blade.php'],
             ['name' => 'Certificate of Indigency', 'description' => 'A certificate of indigency.', 'template_path' => 'templates/cert_indigency.blade.php'],
             ['name' => 'Brgy Business Permit', 'description' => 'A certificate of Brgy Business Permit.', 'template_path' => 'templates/brgy_business_permit.blade.php'],

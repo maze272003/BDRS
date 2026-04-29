@@ -58,7 +58,7 @@ export default function JobSeeker({ auth, userProfile, documentType }) {
                                         <TextInput
                                             type="text"
                                             className="mt-1 block w-full bg-gray-200 dark:bg-gray-700 cursor-not-allowed"
-                                            value={userProfile?.address || ''}
+                                            value={userProfile.full_address || ''}
                                             readOnly
                                         />
                                     </div>
