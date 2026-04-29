@@ -176,7 +176,7 @@ export default function TwoFactor({ two_factor_method = 'sms' }) {
             onSuccess: () => {
                 setSubmissionStatus('success');
                 setTimeout(() => {
-                    router.get(route('dashboard')); 
+                    router.get(route('residents.home')); 
                 }, 1500);
             },
         });

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Barangay;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Seeder;
@@ -15,6 +16,14 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
+        $defaultBarangay = Barangay::where('name', 'Poblacion Central')->first()
+            ?? Barangay::first();
+
+        if (!$defaultBarangay) {
+            $this->command->warn('No barangay found. Please run BarangaySeeder before SuperAdminSeeder.');
+            return;
+        }
+
         // List of Super Admin users
         $superAdmins = [
             [
@@ -32,20 +41,19 @@ class SuperAdminSeeder extends Seeder
         ];
 
         foreach ($superAdmins as $admin) {
-            // Create or get the user
-            $user = User::firstOrCreate(
-                ['email' => $admin['email']],
-                [
-                    'password' => Hash::make($admin['password']),
-                    'role' => 'super_admin',
-                    'status' => 'active',
-                    'email_verified_at' => Carbon::now(),
-                    'barangay_id' => null, // <-- CORRECT: Super Admins are not tied to a specific barangay.
-                    'two_factor_enabled' => true,
-                    'two_factor_method' => 'email',
-                   
-                ]
-            );
+            $user = User::firstOrNew(['email' => $admin['email']]);
+
+            if (!$user->exists) {
+                $user->password = Hash::make($admin['password']);
+            }
+
+            $user->role = 'super_admin';
+            $user->status = 'active';
+            $user->email_verified_at = Carbon::now();
+            $user->barangay_id = $defaultBarangay->id;
+            $user->two_factor_enabled = true;
+            $user->two_factor_method = 'email';
+            $user->save();
 
             // Create a corresponding user profile if it doesn't exist
             if (!$user->profile) {
