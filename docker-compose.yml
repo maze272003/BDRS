@@ -43,9 +43,6 @@ services:
     environment: *laravel-env
     volumes:
       - storage:/app/storage
-    depends_on:
-      mysql:
-        condition: service_healthy
 
   queue:
     build:
@@ -57,9 +54,6 @@ services:
     environment: *laravel-env
     volumes:
       - storage:/app/storage
-    depends_on:
-      mysql:
-        condition: service_healthy
 
   reverb:
     build:
@@ -73,26 +67,6 @@ services:
     environment: *laravel-env
     volumes:
       - storage:/app/storage
-    depends_on:
-      mysql:
-        condition: service_healthy
-
-  mysql:
-    image: mysql:8.0
-    restart: unless-stopped
-    environment:
-      - MYSQL_DATABASE
-      - MYSQL_USER
-      - MYSQL_PASSWORD
-      - MYSQL_ROOT_PASSWORD
-    volumes:
-      - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
 volumes:
-  mysql-data:
   storage:
