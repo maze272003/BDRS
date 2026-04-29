@@ -7,7 +7,7 @@ use App\Events\UnreadMessageCountUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use App\Models\Reply;
-use App\Models\User;
+use App\Services\AdminUnreadMessageNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -84,31 +84,9 @@ class MessagesController extends Controller
             return response()->json(['messages' => [], 'count' => 0]);
         }
 
-        $unreadConversations = ContactMessage::where(function ($query) {
-            $query->where('status', 'unread')
-                  ->orWhereHas('replies', function ($subQuery) {
-                      $subQuery->where('status', 'unread')
-                               ->whereHas('user', function ($userQuery) {
-                                   $userQuery->where('role', 'resident');
-                               });
-                  });
-        })->with('user')->get();
-
-        $totalUnreadCount = $unreadConversations->count();
-        
-        $formattedMessages = $unreadConversations->map(function ($message) {
-            return [
-                'id' => 'contact-' . $message->id,
-                'subject' => $message->subject,
-                'message' => $message->message,
-                'created_at' => $message->created_at,
-            ];
-        })->sortByDesc('created_at')->take(5)->values();
-
-        return response()->json([
-            'messages' => $formattedMessages,
-            'count' => $totalUnreadCount,
-        ]);
+        return response()->json(
+            app(AdminUnreadMessageNotifier::class)->payloadForBarangay($user->barangay_id)
+        );
     }
 
     /**
@@ -138,20 +116,9 @@ class MessagesController extends Controller
         return redirect()->route('admin.messages');
     }
 
-    private function broadcastUnreadCountToAdmins()
+    private function broadcastUnreadCountToAdmins(): void
     {
-        $barangayId = Auth::user()->barangay_id;
-        
-        $unreadCount = ContactMessage::where('barangay_id', $barangayId)
-            ->where('status', 'unread')
-            ->count();
-
-        $admins = User::where('barangay_id', $barangayId)
-            ->where('role', 'admin')
-            ->get();
-
-        foreach ($admins as $admin) {
-            broadcast(new UnreadMessageCountUpdated($admin->id, $unreadCount))->toOthers();
-        }
+        app(AdminUnreadMessageNotifier::class)
+            ->broadcastToBarangayAdmins(Auth::user()->barangay_id);
     }
 }

@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Resident;
 
 use App\Events\ResidentMessageSent; // 👈 PALITAN ITO
-use App\Events\UnreadMessageCountUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use App\Models\Reply;
-use App\Models\User;
+use App\Services\AdminUnreadMessageNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
@@ -91,35 +90,9 @@ class ConversationController extends Controller
         return response()->json(['status' => 'success'], 201);
     }
 
-    private function broadcastUnreadCountToAdmins()
+    private function broadcastUnreadCountToAdmins(): void
     {
-        $barangayId = Auth::user()->barangay_id;
-        
-        $unreadCount = ContactMessage::where('barangay_id', $barangayId)
-            ->where('status', 'unread')
-            ->count();
-
-        $unreadMessages = ContactMessage::where('barangay_id', $barangayId)
-            ->where('status', 'unread')
-            ->with('user')
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(function ($message) {
-                return [
-                    'id' => 'contact-' . $message->id,
-                    'subject' => $message->subject,
-                    'message' => $message->message,
-                    'created_at' => $message->created_at,
-                ];
-            });
-
-        $admins = User::where('barangay_id', $barangayId)
-            ->where('role', 'admin')
-            ->get();
-
-        foreach ($admins as $admin) {
-            broadcast(new UnreadMessageCountUpdated($admin->id, $unreadCount, $unreadMessages->toArray()))->toOthers();
-        }
+        app(AdminUnreadMessageNotifier::class)
+            ->broadcastToBarangayAdmins(Auth::user()->barangay_id);
     }
 }

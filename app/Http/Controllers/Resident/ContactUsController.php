@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Resident;
 
-use App\Events\UnreadMessageCountUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
+use App\Services\AdminUnreadMessageNotifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,33 +38,9 @@ class ContactUsController extends Controller
         return redirect()->route('residents.contact')->with('success', 'Your message has been sent successfully!');
     }
 
-    private function broadcastUnreadCount()
+    private function broadcastUnreadCount(): void
     {
-        $unreadCount = ContactMessage::where('barangay_id', Auth::user()->barangay_id)
-            ->where('status', 'unread')
-            ->count();
-
-        $unreadMessages = ContactMessage::where('barangay_id', Auth::user()->barangay_id)
-            ->where('status', 'unread')
-            ->with('user')
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(function ($message) {
-                return [
-                    'id' => 'contact-' . $message->id,
-                    'subject' => $message->subject,
-                    'message' => $message->message,
-                    'created_at' => $message->created_at,
-                ];
-            });
-
-        $admins = \App\Models\User::where('barangay_id', Auth::user()->barangay_id)
-            ->where('role', 'admin')
-            ->get();
-
-        foreach ($admins as $admin) {
-            broadcast(new UnreadMessageCountUpdated($admin->id, $unreadCount, $unreadMessages->toArray()))->toOthers();
-        }
+        app(AdminUnreadMessageNotifier::class)
+            ->broadcastToBarangayAdmins(Auth::user()->barangay_id);
     }
 }
