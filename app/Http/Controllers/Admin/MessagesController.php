@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\AdminMessageSent;
+use App\Events\UnreadMessageCountUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use App\Models\Reply;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,6 +45,30 @@ class MessagesController extends Controller
 
         $newReply->load('user');
         broadcast(new AdminMessageSent($newReply))->toOthers();
+
+        // Notify resident about new reply
+        if ($message->user_id) {
+            $unreadReplies = Reply::whereHas('contactMessage', function ($query) use ($message) {
+                    $query->where('user_id', $message->user_id);
+                })
+                ->where('user_id', '!=', $message->user_id)
+                ->where('status', 'unread')
+                ->with('contactMessage:id,subject')
+                ->latest()
+                ->limit(5)
+                ->get()
+                ->map(function ($reply) {
+                    return [
+                        'id' => $reply->id,
+                        'subject' => $reply->contactMessage->subject ?? 'Reply to your message',
+                        'message' => $reply->message,
+                    ];
+                });
+
+            $unreadCount = $unreadReplies->count();
+            
+            broadcast(new UnreadMessageCountUpdated($message->user_id, $unreadCount, $unreadReplies->toArray()))->toOthers();
+        }
 
         return response()->json(['status' => 'success']);
     }
@@ -106,6 +132,26 @@ class MessagesController extends Controller
              ->where('status', 'unread')
              ->update(['status' => 'read']);
 
+        // Broadcast updated unread count to admins
+        $this->broadcastUnreadCountToAdmins();
+
         return redirect()->route('admin.messages');
+    }
+
+    private function broadcastUnreadCountToAdmins()
+    {
+        $barangayId = Auth::user()->barangay_id;
+        
+        $unreadCount = ContactMessage::where('barangay_id', $barangayId)
+            ->where('status', 'unread')
+            ->count();
+
+        $admins = User::where('barangay_id', $barangayId)
+            ->where('role', 'admin')
+            ->get();
+
+        foreach ($admins as $admin) {
+            broadcast(new UnreadMessageCountUpdated($admin->id, $unreadCount))->toOthers();
+        }
     }
 }

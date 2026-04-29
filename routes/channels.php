@@ -42,3 +42,10 @@ Broadcast::channel('conversation.{contactMessageId}', function ($user, $contactM
     // Ensure the message exists and the user is the owner.
     return $contactMessage && (int) $user->id === (int) $contactMessage->user_id;
 });
+
+/**
+ * Authorize that a user can listen to their personal message notifications.
+ */
+Broadcast::channel('user.{userId}.messages', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
+});

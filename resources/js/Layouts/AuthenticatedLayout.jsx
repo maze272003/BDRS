@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { route } from 'ziggy-js';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import axios from 'axios';
 import FloatingActionButton from '@/Components/FloatingActionButton';
+import { toast } from 'react-hot-toast';
 
 // --- Driver.js ---
 import { driver } from "driver.js";
@@ -198,10 +199,40 @@ export default function AuthenticatedLayout({ header, children }) {
                 }
             } catch (error) { console.error("Error fetching unread data:", error); }
         };
+
+        // Initial fetch
         fetchUnreadData();
-        const interval = setInterval(fetchUnreadData, 4000);
-        return () => clearInterval(interval);
-    }, [isAdmin]);
+
+        // Set up WebSocket listeners for real-time updates
+        if (window.Echo) {
+            const userId = user.id;
+            console.log('Setting up WebSocket channel for user:', userId);
+            
+            const channel = window.Echo.private(`user.${userId}.messages`);
+
+            channel.listen('.UnreadMessageCountUpdated', (event) => {
+                console.log('Received UnreadMessageCountUpdated event:', event);
+                if (isAdmin) {
+                    setAdminUnreadMessages(event.messages || []);
+                    setAdminUnreadCount(event.count || 0);
+                    if (event.count > 0) {
+                        toast.success(`${event.count} new unread message(s)!`);
+                    }
+                } else {
+                    setResidentUnreadMessages(event.messages || []);
+                    setResidentUnreadCount(event.count || 0);
+                    if (event.count > 0) {
+                        toast.success(`${event.count} new message(s) from admin!`);
+                    }
+                }
+            });
+
+            return () => {
+                channel.stopListening('.UnreadMessageCountUpdated');
+                window.Echo.leave(`user.${userId}.messages`);
+            };
+        }
+    }, [isAdmin, user.id]);
 
      const startMainTour = () => {
         const runTour = () => {
