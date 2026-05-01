@@ -14,8 +14,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Storage; // Add Storage facade
+use Illuminate\Support\Facades\Storage;
 use App\Models\WelcomeContent;
+use App\Events\NewUserRegistered;
 class RegisteredUserController extends Controller
 {
     /**
@@ -108,6 +109,7 @@ class RegisteredUserController extends Controller
         });
 
         event(new Registered($user));
+        event(new NewUserRegistered($user));
 
         return redirect(route('verification.notice'));
     }

@@ -46,6 +46,13 @@ Broadcast::channel('conversation.{contactMessageId}', function ($user, $contactM
 /**
  * Authorize that a user can listen to their personal message notifications.
  */
-Broadcast::channel('user.{userId}.messages', function ($user, $userId) {
+Broadcast::channel('user.{userId}', function ($user, $userId) {
     return (int) $user->id === (int) $userId;
+});
+
+/**
+ * Authorize admins to receive new user registration notifications.
+ */
+Broadcast::channel('admin-registrations', function ($user) {
+    return $user && ($user->can('be-admin') || $user->can('be-super-admin'));
 });
