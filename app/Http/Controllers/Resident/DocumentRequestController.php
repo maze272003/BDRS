@@ -198,7 +198,7 @@ class DocumentRequestController extends Controller
             $fileName = 'signature_' . auth()->id() . '_' . uniqid() . '.png';
             $signaturePath = 'private/signatures/' . $fileName;
 
-            Storage::disk('local')->put($signaturePath, $imageData);
+            Storage::disk('s3-private')->put($signaturePath, $imageData);
             $formData['signature_path'] = $signaturePath;
         }
 
@@ -246,7 +246,7 @@ class DocumentRequestController extends Controller
             'receipt' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $path = $validated['receipt']->store('receipts', 'local');
+        $path = $validated['receipt']->store('receipts', 's3-private');
 
         $documentRequest->update([
             'payment_receipt_path' => $path,

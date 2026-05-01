@@ -5,11 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class UserProfile extends Model
 {
     use HasFactory;
-    protected $appends = ['full_address'];
+    protected $appends = [
+        'full_address',
+        'valid_id_front_url',
+        'valid_id_back_url',
+        'face_image_url',
+    ];
     /**
      * The attributes that are mass assignable.
      *
@@ -83,6 +89,26 @@ class UserProfile extends Model
         ], fn($value) => !empty($value));
 
         return implode(', ', $parts);
+    }
+
+    public function getValidIdFrontUrlAttribute(): ?string
+    {
+        return $this->publicUploadUrl($this->valid_id_front_path);
+    }
+
+    public function getValidIdBackUrlAttribute(): ?string
+    {
+        return $this->publicUploadUrl($this->valid_id_back_path);
+    }
+
+    public function getFaceImageUrlAttribute(): ?string
+    {
+        return $this->publicUploadUrl($this->face_image_path);
+    }
+
+    private function publicUploadUrl(?string $path): ?string
+    {
+        return $path ? Storage::disk('s3')->url($path) : null;
     }
     
 }

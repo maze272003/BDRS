@@ -168,24 +168,24 @@ export default function Edit({ auth, mustVerifyEmail, status, userProfile }) {
 
                                     {activeTab === 'verification' && (
                                         <SettingsCard key="verification" title="Uploaded Credentials" description="These are the images you provided during registration. Click to enlarge.">
-                                            {(userProfile && (userProfile.face_image_path || userProfile.valid_id_front_path)) ? (
+                                            {(userProfile && (userProfile.face_image_url || userProfile.valid_id_front_url)) ? (
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
-                                                    {userProfile.face_image_path && (
+                                                    {userProfile.face_image_url && (
                                                         <div>
                                                             <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Face Picture</h3>
-                                                            <img onClick={() => setViewingImage(`/storage/${userProfile.face_image_path}`)} src={`/storage/${userProfile.face_image_path}`} alt="Face Picture" className="w-full h-auto rounded-lg shadow-md aspect-square object-cover cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-xl" />
+                                                            <img onClick={() => setViewingImage(userProfile.face_image_url)} src={userProfile.face_image_url} alt="Face Picture" className="w-full h-auto rounded-lg shadow-md aspect-square object-cover cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-xl" />
                                                         </div>
                                                     )}
-                                                    {userProfile.valid_id_front_path && (
+                                                    {userProfile.valid_id_front_url && (
                                                         <div>
                                                             <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Valid ID (Front)</h3>
-                                                            <img onClick={() => setViewingImage(`/storage/${userProfile.valid_id_front_path}`)} src={`/storage/${userProfile.valid_id_front_path}`} alt="Valid ID Front" className="w-full h-auto rounded-lg shadow-md aspect-[1.586/1] object-cover cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-xl" />
+                                                            <img onClick={() => setViewingImage(userProfile.valid_id_front_url)} src={userProfile.valid_id_front_url} alt="Valid ID Front" className="w-full h-auto rounded-lg shadow-md aspect-[1.586/1] object-cover cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-xl" />
                                                         </div>
                                                     )}
-                                                    {userProfile.valid_id_back_path && (
+                                                    {userProfile.valid_id_back_url && (
                                                         <div>
                                                             <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Valid ID (Back)</h3>
-                                                            <img onClick={() => setViewingImage(`/storage/${userProfile.valid_id_back_path}`)} src={`/storage/${userProfile.valid_id_back_path}`} alt="Valid ID Back" className="w-full h-auto rounded-lg shadow-md aspect-[1.586/1] object-cover cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-xl" />
+                                                            <img onClick={() => setViewingImage(userProfile.valid_id_back_url)} src={userProfile.valid_id_back_url} alt="Valid ID Back" className="w-full h-auto rounded-lg shadow-md aspect-[1.586/1] object-cover cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-xl" />
                                                         </div>
                                                     )}
                                                 </div>

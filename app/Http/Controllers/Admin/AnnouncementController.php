@@ -52,7 +52,7 @@ class AnnouncementController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
-        $imagePath = $request->file('image')->store('announcements', 'public');
+        $imagePath = $request->file('image')->store('announcements', 's3');
 
         Announcement::create([
             'tag' => $request->tag,
@@ -93,10 +93,10 @@ class AnnouncementController extends Controller
         if ($request->hasFile('image')) {
             // Delete the old image from storage
             if ($announcement->image) {
-                Storage::disk('public')->delete($announcement->image);
+                Storage::disk('s3')->delete($announcement->image);
             }
             // Store the new image and add it to our update data array.
-            $updateData['image'] = $request->file('image')->store('announcements', 'public');
+            $updateData['image'] = $request->file('image')->store('announcements', 's3');
         }
 
         // 3. Update the announcement with the prepared data.
@@ -110,7 +110,7 @@ class AnnouncementController extends Controller
     {
         // Delete the image file from storage if it exists
         if ($announcement->image) {
-            Storage::disk('public')->delete($announcement->image);
+            Storage::disk('s3')->delete($announcement->image);
         }
 
         $announcement->delete();

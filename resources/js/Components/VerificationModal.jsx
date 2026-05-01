@@ -52,8 +52,7 @@ const InfoField = ({ icon: Icon, label, value }) => (
     </div>
 );
 
-const ImageBox = ({ title, path, onImageClick }) => {
-    const imageUrl = path ? `/storage/${path}` : null;
+const ImageBox = ({ title, imageUrl, onImageClick }) => {
     return (
         <div className="w-full sm:w-1/3 p-2">
             <div className="bg-white dark:bg-slate-800/50 rounded-lg p-3 border border-slate-200 dark:border-slate-700 h-full flex flex-col">
@@ -142,7 +141,7 @@ export default function VerificationModal({ user, isOpen, onClose, onVerify, onR
         <>
             <ModalWrapper isOpen={isOpen} onClose={onClose}>
                 {isUpdating && <LoadingOverlay />}
-                <ModalHeader user={user} onClose={onClose} onAvatarClick={() => user.profile?.face_image_path && setSelectedImage(`/storage/${user.profile.face_image_path}`)}/>
+                <ModalHeader user={user} onClose={onClose} onAvatarClick={() => user.profile?.face_image_url && setSelectedImage(user.profile.face_image_url)}/>
                 
                 <div className="p-6 overflow-y-auto flex-grow">
                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -161,9 +160,9 @@ export default function VerificationModal({ user, isOpen, onClose, onVerify, onR
                              <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-shadow hover:shadow-md">
                                 <h3 className="flex items-center gap-3 text-lg font-semibold text-slate-800 dark:text-white mb-4 pb-3 border-b border-slate-200 dark:border-slate-700"><ImageIcon size={20} className="text-blue-500"/> Uploaded Credentials</h3>
                                 <div className="flex flex-col sm:flex-row -m-2">
-                                    <ImageBox title="Valid ID (Front)" path={user.profile?.valid_id_front_path} onImageClick={setSelectedImage} />
-                                    <ImageBox title="Valid ID (Back)" path={user.profile?.valid_id_back_path} onImageClick={setSelectedImage} />
-                                    <ImageBox title="Selfie Photo" path={user.profile?.face_image_path} onImageClick={setSelectedImage} />
+                                    <ImageBox title="Valid ID (Front)" imageUrl={user.profile?.valid_id_front_url} onImageClick={setSelectedImage} />
+                                    <ImageBox title="Valid ID (Back)" imageUrl={user.profile?.valid_id_back_url} onImageClick={setSelectedImage} />
+                                    <ImageBox title="Selfie Photo" imageUrl={user.profile?.face_image_url} onImageClick={setSelectedImage} />
                                 </div>
                             </div>
                         </div>

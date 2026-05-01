@@ -78,9 +78,9 @@ class RegisteredUserController extends Controller
             ]);
 
             // Handle file uploads
-            $idFrontPath = $request->file('valid_id_front_image')->store('id_images', 'public');
-            $idBackPath = $request->file('valid_id_back_image')->store('id_images', 'public');
-            $faceImagePath = $request->file('face_image')->store('face_images', 'public');
+            $idFrontPath = $request->file('valid_id_front_image')->store('id_images', 's3');
+            $idBackPath = $request->file('valid_id_back_image')->store('id_images', 's3');
+            $faceImagePath = $request->file('face_image')->store('face_images', 's3');
 
             // STEP 3: Create the User Profile with the full text address for display.
             // This is the "business card" with descriptive info.
