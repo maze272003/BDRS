@@ -12,9 +12,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+        $middleware->web(
+            prepend: [
+                \App\Http\Middleware\EnforceRequestSecurityLimits::class,
+                \App\Http\Middleware\LimitConcurrentRequests::class,
+                \App\Http\Middleware\SanitizeRequestInput::class,
+                \App\Http\Middleware\TrackTrafficMetrics::class,
+            ],
+            append: [
+                \App\Http\Middleware\HandleInertiaRequests::class,
+                \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            ],
+        );
+
+        $middleware->alias([
+            'progressive.throttle' => \App\Http\Middleware\ProgressiveThrottleRequests::class,
         ]);
 
         //

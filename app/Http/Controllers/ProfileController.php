@@ -48,20 +48,28 @@ class ProfileController extends Controller
 
         $user = $request->user();
         $user->email = $request->email;
+
+        if ($user->isDirty('email') && $user instanceof MustVerifyEmail) {
+            $user->email_verified_at = null;
+        }
+
         $user->save();
- 
-        $user->profile()->update([
+
+        $user->profile()->updateOrCreate(['user_id' => $user->id], [
             'first_name'   => $request->first_name,
             'middle_name'  => $request->middle_name,
             'last_name'    => $request->last_name,
             'phone_number' => $request->phone_number,
-            'address'      => $request->address,
+            'province'     => $user->profile?->province ?? 'Nueva Ecija',
+            'city'         => $user->profile?->city ?? 'City of Gapan',
+            'barangay'     => $user->profile?->barangay ?? $user->barangay?->name ?? 'San Lorenzo',
+            'street_address' => $user->profile?->street_address ?? '',
             'birthday'     => $request->birthday,
             'gender'       => $request->gender,
             'civil_status' => $request->civil_status,
         ]);
 
-        return back()->with('success', 'Profile updated successfully.');
+        return Redirect::route('profile.edit')->with('success', 'Profile updated successfully.');
     }
 
     // --- ADD THIS NEW METHOD ---

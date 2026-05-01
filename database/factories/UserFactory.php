@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Barangay;
+use App\Models\Municipality;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -34,8 +35,8 @@ class UserFactory extends Factory
             'role' => 'resident', // Default role for a factory-created user
             'status' => 'active',
             'verification_status' => 'verified',
-            'barangay_id' => Barangay::inRandomOrder()->first()->id, // Dynamically assign a random barangay
-            'two_factor_enabled' => true,
+            'barangay_id' => Barangay::query()->inRandomOrder()->value('id') ?? $this->defaultBarangayId(),
+            'two_factor_enabled' => false,
             'two_factor_method' => 'email',
         ];
     }
@@ -49,5 +50,19 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
-}
 
+    private function defaultBarangayId(): int
+    {
+        $municipality = Municipality::query()->firstOrCreate(
+            ['name' => 'Test Municipality'],
+            ['province' => 'Test Province'],
+        );
+
+        return Barangay::query()->firstOrCreate(
+            [
+                'municipality_id' => $municipality->id,
+                'name' => 'Test Barangay',
+            ],
+        )->id;
+    }
+}

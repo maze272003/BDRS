@@ -71,7 +71,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
         last_name: user.profile?.last_name || '',
         email: user.email || '',
         phone_number: user.profile?.phone_number || '',
-        address: user.profile?.address || '',
+        address: user.profile?.full_address || '',
         birthday: user.profile?.birthday ? new Date(user.profile.birthday).toISOString().split('T')[0] : '',
         gender: user.profile?.gender || '',
         civil_status: user.profile?.civil_status || '',
