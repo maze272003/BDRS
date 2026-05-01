@@ -58,6 +58,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | DDoS Protection
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for automated DDoS protection mechanism. Monitors
+    | request frequency per IP and automatically blocks abusive IPs.
+    |
+    */
+
+    'ddos' => [
+        'enabled' => (bool) env('SECURITY_DDOS_ENABLED', true),
+        'requests_per_minute' => (int) env('SECURITY_DDOS_REQUESTS_PER_MINUTE', 500),
+        'ban_duration_minutes' => (int) env('SECURITY_DDOS_BAN_DURATION_MINUTES', 60),
+        'whitelist' => array_filter(explode(',', env('SECURITY_DDOS_WHITELIST', ''))),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Honeypot Routes
     |--------------------------------------------------------------------------
     |

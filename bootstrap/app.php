@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(
             prepend: [
+                \App\Http\Middleware\DDoSProtection::class,
                 \App\Http\Middleware\EnforceRequestSecurityLimits::class,
                 \App\Http\Middleware\LimitConcurrentRequests::class,
                 \App\Http\Middleware\SanitizeRequestInput::class,
