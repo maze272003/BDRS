@@ -8,6 +8,7 @@ use App\Models\UserProfile;
 use App\Models\DocumentRequest;
 use App\Models\DocumentType;
 use Illuminate\Database\Seeder;
+use Carbon\Carbon;
 
 class ResidentSeeder extends Seeder
 {
@@ -31,28 +32,39 @@ class ResidentSeeder extends Seeder
             }
 
             // Create 50 residents for the current barangay
-            User::factory(50)
+            $users = User::factory(50)
                 ->state(['barangay_id' => $barangay->id]) // Assign the user to the current barangay
-                ->create()
-                ->each(function ($user) use ($documentTypeIds) {
-                    
-                    // Create a profile for each user
-                    UserProfile::factory()->create([
+                ->create();
+
+            // Verify users and track index
+            $userIndex = 0;
+            $users->each(function ($user) use ($documentTypeIds, &$userIndex) {
+
+                // Create a profile for each user
+                UserProfile::factory()->create([
+                    'user_id' => $user->id,
+                ]);
+
+                // Verify all users except the last 3 (leave them unverified)
+                if ($userIndex < 47) { // 50 - 3 = 47
+                    $user->email_verified_at = Carbon::now();
+                    $user->save();
+                }
+
+                // Each user will request 1 to 3 documents
+                $requestsCount = rand(1, 3);
+
+                for ($i = 0; $i < $requestsCount; $i++) {
+                    DocumentRequest::factory()->create([
                         'user_id' => $user->id,
+                        'barangay_id' => $user->barangay_id, // Also add barangay_id here
+                        // Randomly pick a document type ID from the ones available for this user's barangay
+                        'document_type_id' => $documentTypeIds->random(),
                     ]);
+                }
 
-                    // Each user will request 1 to 3 documents
-                    $requestsCount = rand(1, 3);
-
-                    for ($i = 0; $i < $requestsCount; $i++) {
-                        DocumentRequest::factory()->create([
-                            'user_id' => $user->id,
-                            'barangay_id' => $user->barangay_id, // Also add barangay_id here
-                            // Randomly pick a document type ID from the ones available for this user's barangay
-                            'document_type_id' => $documentTypeIds->random(),
-                        ]);
-                    }
-                });
+                $userIndex++;
+            });
         }
     }
 }
