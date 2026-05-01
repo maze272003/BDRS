@@ -17,8 +17,13 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Storage;
 use App\Models\WelcomeContent;
 use App\Events\NewUserRegistered;
+use App\Services\ImageCompressionService;
 class RegisteredUserController extends Controller
 {
+    public function __construct(
+        private ImageCompressionService $compressionService
+    ) {}
+
     /**
      * Display the registration view.
      */
@@ -56,9 +61,9 @@ class RegisteredUserController extends Controller
             'place_of_birth' => 'required|string|max:255',
             'civil_status' => 'required|string|max:50',
             'valid_id_type' => 'required|string|max:255',
-            'valid_id_front_image' => 'required|file|mimes:jpeg,png,jpg|max:2048',
-            'valid_id_back_image' => 'required|file|mimes:jpeg,png,jpg|max:2048',
-            'face_image' => 'required|file|mimes:jpeg,png,jpg|max:2048',
+            'valid_id_front_image' => 'required|file|mimes:jpeg,png,jpg|max:10240',
+            'valid_id_back_image' => 'required|file|mimes:jpeg,png,jpg|max:10240',
+            'face_image' => 'required|file|mimes:jpeg,png,jpg|max:10240',
         ]);
 
         $user = DB::transaction(function () use ($request) {
@@ -78,10 +83,10 @@ class RegisteredUserController extends Controller
                 
             ]);
 
-            // Handle file uploads
-            $idFrontPath = $request->file('valid_id_front_image')->store('id_images', 's3');
-            $idBackPath = $request->file('valid_id_back_image')->store('id_images', 's3');
-            $faceImagePath = $request->file('face_image')->store('face_images', 's3');
+            // Handle file uploads with compression
+            $idFrontPath = $this->compressionService->compress($request->file('valid_id_front_image'), 'id_images');
+            $idBackPath = $this->compressionService->compress($request->file('valid_id_back_image'), 'id_images');
+            $faceImagePath = $this->compressionService->compress($request->file('face_image'), 'face_images');
 
             // STEP 3: Create the User Profile with the full text address for display.
             // This is the "business card" with descriptive info.

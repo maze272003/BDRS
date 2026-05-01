@@ -12,9 +12,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Events\DocumentRequestCreated;
 use App\Models\ImmutableDocumentsArchiveHistory;
+use App\Services\ImageCompressionService;
 
 class DocumentRequestController extends Controller
 {
+    public function __construct(
+        private ImageCompressionService $compressionService
+    ) {}
     /**
      * Display a listing of the user's active and past document requests.
      */
@@ -243,10 +247,10 @@ class DocumentRequestController extends Controller
         }
 
         $validated = $request->validate([
-            'receipt' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'receipt' => 'required|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
-        $path = $validated['receipt']->store('receipts', 's3-private');
+        $path = $this->compressionService->compress($validated['receipt'], 'receipts', 80);
 
         $documentRequest->update([
             'payment_receipt_path' => $path,

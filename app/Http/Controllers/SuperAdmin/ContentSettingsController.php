@@ -7,9 +7,14 @@ use Illuminate\Http\Request;
 use App\Models\WelcomeContent;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ImageCompressionService;
 
 class ContentSettingsController extends Controller
 {
+    public function __construct(
+        private ImageCompressionService $compressionService
+    ) {}
+
     private function publicDisk(): string
     {
         return 's3';
@@ -74,7 +79,7 @@ class ContentSettingsController extends Controller
                 if ($currentPhotoPath) {
                     Storage::disk($this->publicDisk())->delete($this->storedPathFromUrl($currentPhotoPath));
                 }
-                $path = $request->file("officials_files.{$i}")->store('officials', $this->publicDisk());
+                $path = $this->compressionService->compress($request->file("officials_files.{$i}"), 'officials', 80);
                 $officialsData[$i]['photo_url'] = Storage::disk($this->publicDisk())->url($path);
             } else {
                  $officialsData[$i]['photo_url'] = $currentPhotoPath;
@@ -84,7 +89,7 @@ class ContentSettingsController extends Controller
 
         if ($request->hasFile('footer_logo_file')) {
             if ($settings->footer_logo_url) { Storage::disk($this->publicDisk())->delete($this->storedPathFromUrl($settings->footer_logo_url)); }
-            $path = $request->file('footer_logo_file')->store('site_logos', $this->publicDisk());
+            $path = $this->compressionService->compress($request->file('footer_logo_file'), 'site_logos', 85);
             $dataToUpdate['footer_logo_url'] = Storage::disk($this->publicDisk())->url($path);
         } elseif ($request->input('footer_logo_file') === 'remove') {
             if ($settings->footer_logo_url) {

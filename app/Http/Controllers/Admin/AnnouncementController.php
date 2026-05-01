@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage; // Added for file deletion
 use Inertia\Inertia;
+use App\Services\ImageCompressionService;
 
 class AnnouncementController extends Controller
 {
+    public function __construct(
+        private ImageCompressionService $compressionService
+    ) {}
     /**
      * Display a listing of the resource.
      */
@@ -52,7 +56,7 @@ class AnnouncementController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
-        $imagePath = $request->file('image')->store('announcements', 's3');
+        $imagePath = $this->compressionService->compress($request->file('image'), 'announcements', 80);
 
         Announcement::create([
             'tag' => $request->tag,
@@ -95,8 +99,8 @@ class AnnouncementController extends Controller
             if ($announcement->image) {
                 Storage::disk('s3')->delete($announcement->image);
             }
-            // Store the new image and add it to our update data array.
-            $updateData['image'] = $request->file('image')->store('announcements', 's3');
+            // Store the new compressed image
+            $updateData['image'] = $this->compressionService->compress($request->file('image'), 'announcements', 80);
         }
 
         // 3. Update the announcement with the prepared data.
