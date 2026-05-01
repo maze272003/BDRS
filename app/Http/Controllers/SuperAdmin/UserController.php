@@ -23,7 +23,7 @@ class UserController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $query = User::with('profile')
+        $query = User::with(['profile', 'barangay'])
             ->orderBy($request->input('sortBy', 'created_at'), $request->input('sortOrder', 'desc'));
 
         // --- NEW: SCOPE QUERY FOR ADMINS ---

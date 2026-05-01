@@ -51,6 +51,27 @@ const VerificationStatusBadge = ({ status }) => {
     );
 };
 
+const UserLocation = ({ user }) => {
+    const barangay = user.barangay?.name || user.profile?.barangay;
+    const city = user.profile?.city;
+    const province = user.profile?.province;
+
+    if (!barangay && !city && !province) {
+        return <span className="text-gray-400">Not set</span>;
+    }
+
+    return (
+        <div className="min-w-0">
+            <div className="font-medium text-gray-900 truncate">{barangay || 'No barangay'}</div>
+            {(city || province) && (
+                <div className="text-xs text-gray-500 truncate">
+                    {[city, province].filter(Boolean).join(', ')}
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function UserManagement({ auth, users: initialUsers, filters }) {
     const { flash } = usePage().props;
     const [localUsers, setLocalUsers] = useState(initialUsers.data);
@@ -211,6 +232,7 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                         <tr>
                                             <th scope="col" onClick={() => handleSort('full_name')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Name</th>
                                             <th scope="col" onClick={() => handleSort('email')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Email</th>
+                                            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Barangay</th>
                                             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Role</th>
                                             <th scope="col" onClick={() => handleSort('created_at')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Registered On</th>
                                             <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Verification</th>
@@ -226,6 +248,7 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                                 <tr key={user.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-50 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
                                                     <td data-label="Name" className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.full_name}</td>
                                                     <td data-label="Email" className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
+                                                    <td data-label="Barangay" className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"><UserLocation user={user} /></td>
                                                     <td data-label="Role" className="px-6 py-4 whitespace-nowrap text-sm">
                                                         {updatingUserRole === user.id ? <LoadingSpinner /> : (
                                                             <>
@@ -275,7 +298,7 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan={hasWriteAccess ? 6 : 5} className="px-6 py-12 text-center text-gray-500 bg-gray-50">
+                                                <td colSpan={hasWriteAccess ? 7 : 6} className="px-6 py-12 text-center text-gray-500 bg-gray-50">
                                                     <div className="flex flex-col items-center justify-center">
                                                         <HelpCircle className="h-12 w-12 text-gray-300 mb-2" />
                                                         <p className="text-lg font-medium text-gray-900">No users found</p>
