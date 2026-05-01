@@ -82,7 +82,7 @@ class ConversationController extends Controller
 
         $newReply->load('user'); 
         // 👇 GAMITIN ANG BAGONG EVENT
-        broadcast(new ResidentMessageSent($newReply))->toOthers();
+        broadcast(new ResidentMessageSent($newReply));
 
         // Notify admins about new unread message
         $this->broadcastUnreadCountToAdmins();

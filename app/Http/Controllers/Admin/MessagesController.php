@@ -44,7 +44,7 @@ class MessagesController extends Controller
         $message->update(['status' => 'replied']);
 
         $newReply->load('user');
-        broadcast(new AdminMessageSent($newReply))->toOthers();
+        broadcast(new AdminMessageSent($newReply));
 
         // Notify resident about new reply
         if ($message->user_id) {
@@ -67,7 +67,7 @@ class MessagesController extends Controller
 
             $unreadCount = $unreadReplies->count();
             
-            broadcast(new UnreadMessageCountUpdated($message->user_id, $unreadCount, $unreadReplies->toArray()))->toOthers();
+            broadcast(new UnreadMessageCountUpdated($message->user_id, $unreadCount, $unreadReplies->toArray()));
         }
 
         return response()->json(['status' => 'success']);

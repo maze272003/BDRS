@@ -95,12 +95,36 @@ export default function MessagesModal({ onClose, initialConversation, threadId, 
     
     useEffect(() => {
         if (!threadId) return;
+        if (!window.Echo) return;
+
         const channel = window.Echo.private(`conversation.${threadId}`);
-        channel.listen('AdminMessageSent', (event) => {
+
+        channel.listen('.AdminMessageSent', (event) => {
+            const reply = event.reply;
+            if (reply) {
+                setMessages(prevMessages => {
+                    const messageId = `reply-${reply.id}`;
+                    if (prevMessages.some(message => message.id === messageId)) {
+                        return prevMessages;
+                    }
+
+                    return [
+                        ...prevMessages,
+                        {
+                            id: messageId,
+                            text: reply.message,
+                            sender: reply.user?.role === 'resident' ? 'user' : 'admin',
+                            created_at: reply.created_at,
+                        },
+                    ];
+                });
+            }
+
             onNewMessage();
         });
+
         return () => {
-            channel.stopListening('AdminMessageSent');
+            channel.stopListening('.AdminMessageSent');
             window.Echo.leaveChannel(`conversation.${threadId}`);
         };
     }, [threadId, onNewMessage]);

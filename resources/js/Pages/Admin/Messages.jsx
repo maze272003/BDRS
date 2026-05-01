@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, usePage, router } from "@inertiajs/react";
 import { format, formatDistanceToNow } from 'date-fns';
@@ -31,6 +31,14 @@ export default function Messages() {
     
     const [replyMessage, setReplyMessage] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const reloadMessages = useCallback(() => {
+        router.reload({
+            only: ['messages'],
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }, []);
 
     const conversations = useMemo(() => {
         const userGroups = new Map();
@@ -76,21 +84,36 @@ export default function Messages() {
     
     useEffect(() => {
         if (!activeConversationId) return;
+        if (!window.Echo) return;
+
         const activeConv = conversations.find(c => c.user.id === activeConversationId);
         if (!activeConv || activeConv.thread.length === 0) return;
         
         const threadId = activeConv.thread[0].id;
         const channel = window.Echo.private(`conversation.${threadId}`);
 
-        channel.listen('ResidentMessageSent', () => {
-            router.reload({ preserveState: true, preserveScroll: true });
-        });
+        channel.listen('.ResidentMessageSent', reloadMessages);
+        channel.listen('.AdminMessageSent', reloadMessages);
 
         return () => {
-            channel.stopListening('ResidentMessageSent');
+            channel.stopListening('.ResidentMessageSent');
+            channel.stopListening('.AdminMessageSent');
             window.Echo.leaveChannel(`conversation.${threadId}`);
         };
-    }, [activeConversationId, conversations]);
+    }, [activeConversationId, conversations, reloadMessages]);
+
+    useEffect(() => {
+        if (!window.Echo || !auth?.user?.id) return;
+
+        const channel = window.Echo.private(`user.${auth.user.id}.messages`);
+
+        channel.listen('.UnreadMessageCountUpdated', reloadMessages);
+
+        return () => {
+            channel.stopListening('.UnreadMessageCountUpdated');
+            window.Echo.leave(`user.${auth.user.id}.messages`);
+        };
+    }, [auth?.user?.id, reloadMessages]);
 
     const handleSelectConversation = (conversation) => {
         setActiveConversationId(conversation.user.id);
@@ -118,7 +141,7 @@ export default function Messages() {
             });
             setReplyMessage('');
             if (replyTextareaRef.current) replyTextareaRef.current.style.height = 'auto';
-            router.reload({ preserveState: true, preserveScroll: true });
+            reloadMessages();
         } catch (error) {
             console.error("Failed to send reply:", error);
         } finally {
