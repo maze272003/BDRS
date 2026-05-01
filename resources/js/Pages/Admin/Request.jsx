@@ -7,6 +7,15 @@ import Pagination from '@/Components/Pagination';
 import { useDebounce } from 'use-debounce';
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import {
+    ResponsiveTable,
+    ResponsiveTableBody,
+    ResponsiveTableCell,
+    ResponsiveTableEmpty,
+    ResponsiveTableHead,
+    ResponsiveTableHeaderCell,
+    ResponsiveTableRow,
+} from '@/Components/ResponsiveTable';
 
 import {
     Eye,
@@ -455,102 +464,65 @@ export default function Request() {
                             </div>
                         </div>
 
-                        <div id="requests-list-container">
-                            {/* Mobile View */}
-                            <div className="md:hidden">
-                                {(documentRequests.data && documentRequests.data.length > 0) ? documentRequests.data.map((request, index) => (
-                                    <div key={request.id} className="border-b dark:border-gray-700 p-4 space-y-3">
-                                        <div className="flex justify-between items-start">
-                                            <div className="font-bold text-gray-900 dark:text-white">{request.user?.full_name || "N/A"}</div>
-                                            <StatusBadge status={request.status} />
-                                        </div>
-                                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                                            <p><span className="font-semibold">Document:</span> {request.document_type?.name || "N/A"}</p>
-                                            <p><span className="font-semibold">Date:</span> {new Date(request.created_at).toLocaleDateString()}</p>
-                                        </div>
-                                        <div className={`flex items-center gap-2 pt-2 border-t dark:border-gray-600 ${index === 0 ? 'actions-column-item' : ''}`}>
-                                            <div className="w-full">
-                                                {renderActions(request, index)}
-                                            </div>
-                                            {request.payment_receipt_url && (
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedRequest(request);
-                                                        setShowReceiptModal(true);
-                                                    }}
-                                                    title="View Payment Receipt"
-                                                    className="p-2 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-gray-700 rounded-md transition shrink-0"
-                                                >
-                                                    <ReceiptText />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                )) : (
-                                    <div className="text-center py-16">
-                                        <FileX2 className="mx-auto h-12 w-12 text-gray-400" />
-                                        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No active requests found</h3>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Desktop View */}
-                            <div className="hidden md:block overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead className="bg-blue-600 text-white">
-                                        <tr>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold hover:bg-blue-800 dark:text-gray-300 uppercase">Requestor</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold hover:bg-blue-800 dark:text-gray-300 uppercase">Document</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold hover:bg-blue-800 dark:text-gray-300 uppercase">Status</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold hover:bg-blue-800 dark:text-gray-300 uppercase">Date</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold hover:bg-blue-800 dark:text-gray-300 uppercase actions-column">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {(documentRequests.data && documentRequests.data.length > 0) ? documentRequests.data.map((request, index) => (
-                                            <tr key={request.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{request.user?.full_name || "N/A"}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{request.document_type?.name || "N/A"}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={request.status} /></td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{new Date(request.created_at).toLocaleDateString()}</td>
-                                                <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${index === 0 ? 'actions-column-item' : ''}`}>
-                                                    <div  id="actions-items" className="flex items-center gap-2">
-                                                        {renderActions(request, index)}
-                                                        {request.payment_receipt_url && (
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSelectedRequest(request);
-                                                                    setShowReceiptModal(true);
-                                                                }}
-                                                                title="View Payment Receipt"
-                                                                className="p-2 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-gray-700 rounded-md transition"
-                                                            >
-                                                                <ReceiptText />
-                                                            </button>
-                                                        )}
-                                                        {request.status === 'Processing' && (
-                                                            <>
-                                                                {/* <button onClick={() => handlePreviewClick(request)} title="Preview" className="p-2 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"><Eye /></button> */}
-                                                                <a href={route('admin.requests.generate', request.id)} title="Generate" className="p-2 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"><Download /></a>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        )) : (
-                                            <tr>
-                                                <td colSpan="5" className="text-center py-16">
-                                                    <FileX2 className="mx-auto h-12 w-12 text-gray-400" />
-                                                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No active requests found</h3>
-                                                    <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filter.</p>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div id="requests-list-container" className="p-4 md:p-0">
+                            <ResponsiveTable>
+                                <ResponsiveTableHead>
+                                    <tr>
+                                        <ResponsiveTableHeaderCell>Requestor</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell>Document</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell>Status</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell>Date</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell className="actions-column">Actions</ResponsiveTableHeaderCell>
+                                    </tr>
+                                </ResponsiveTableHead>
+                                <ResponsiveTableBody className="md:bg-white md:dark:bg-gray-800 md:divide-y md:divide-gray-200 md:dark:divide-gray-700">
+                                    {(documentRequests.data && documentRequests.data.length > 0) ? documentRequests.data.map((request, index) => (
+                                        <ResponsiveTableRow key={request.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
+                                            <ResponsiveTableCell label="Requestor" nowrap className="font-medium text-gray-900 dark:text-white">
+                                                {request.user?.full_name || "N/A"}
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Document" nowrap className="text-gray-500 dark:text-gray-300">
+                                                {request.document_type?.name || "N/A"}
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Status" nowrap>
+                                                <StatusBadge status={request.status} />
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Date" nowrap className="text-gray-500 dark:text-gray-300">
+                                                {new Date(request.created_at).toLocaleDateString()}
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Actions" nowrap className={index === 0 ? 'actions-column-item' : ''} contentClassName="flex justify-end">
+                                                <div id={index === 0 ? "actions-items" : undefined} className="flex w-full flex-col items-stretch gap-2 md:w-auto md:flex-row md:items-center">
+                                                    {renderActions(request, index)}
+                                                    {request.payment_receipt_url && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedRequest(request);
+                                                                setShowReceiptModal(true);
+                                                            }}
+                                                            title="View Payment Receipt"
+                                                            className="inline-flex items-center justify-center rounded-md p-2 text-blue-600 transition hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-gray-700"
+                                                        >
+                                                            <ReceiptText />
+                                                        </button>
+                                                    )}
+                                                    {request.status === 'Processing' && (
+                                                        <a href={route('admin.requests.generate', request.id)} title="Generate" className="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                            <Download />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </ResponsiveTableCell>
+                                        </ResponsiveTableRow>
+                                    )) : (
+                                        <ResponsiveTableEmpty colSpan="5">
+                                            <FileX2 className="mx-auto h-12 w-12 text-gray-400" />
+                                            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No active requests found</h3>
+                                            <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filter.</p>
+                                        </ResponsiveTableEmpty>
+                                    )}
+                                </ResponsiveTableBody>
+                            </ResponsiveTable>
                         </div>
-
                         {documentRequests.data.length > 0 && (
                             <div id="pagination-section" className="p-4 border-t dark:border-gray-700">
                                 <Pagination

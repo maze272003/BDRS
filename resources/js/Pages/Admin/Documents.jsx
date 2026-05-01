@@ -10,6 +10,15 @@ import toast, { Toaster } from 'react-hot-toast';
 // --- Import Driver.js for the tour ---
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import {
+    ResponsiveTable,
+    ResponsiveTableBody,
+    ResponsiveTableCell,
+    ResponsiveTableEmpty,
+    ResponsiveTableHead,
+    ResponsiveTableHeaderCell,
+    ResponsiveTableRow,
+} from '@/Components/ResponsiveTable';
 
 // --- Icon Components ---
 const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>;
@@ -272,44 +281,44 @@ export default function Documents() {
                             </div>
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full">
-                                <thead id="document-table-thead" className="bg-blue-600 text-white">
+                        <div className="p-4 md:p-0">
+                            <ResponsiveTable>
+                                <ResponsiveTableHead id="document-table-thead">
                                     <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold  uppercase tracking-wider cursor-pointer hover:bg-blue-800  transition duration-200" onClick={() => requestSort('name')}>
+                                        <ResponsiveTableHeaderCell className="py-4 cursor-pointer hover:bg-blue-800 transition duration-200" onClick={() => requestSort('name')}>
                                             <div className="flex items-center space-x-1">
                                                 <span>Name</span>
                                                 {sortConfig.key === 'name' && (
-                                                    <span className="text-xs">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+                                                    <span className="text-xs">{sortConfig.direction === 'ascending' ? 'ASC' : 'DESC'}</span>
                                                 )}
                                             </div>
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-800  transition duration-200" onClick={() => requestSort('description')}>
+                                        </ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell className="py-4 cursor-pointer hover:bg-blue-800 transition duration-200" onClick={() => requestSort('description')}>
                                             <div className="flex items-center space-x-1">
                                                 <span>Description</span>
                                                 {sortConfig.key === 'description' && (
-                                                     <span className="text-xs">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+                                                    <span className="text-xs">{sortConfig.direction === 'ascending' ? 'ASC' : 'DESC'}</span>
                                                 )}
                                             </div>
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold hover:bg-blue-800  uppercase tracking-wider">Actions</th>
+                                        </ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell className="py-4 hover:bg-blue-800">Actions</ResponsiveTableHeaderCell>
                                     </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                </ResponsiveTableHead>
+                                <ResponsiveTableBody className="md:bg-white md:divide-y md:divide-gray-200">
                                     {sortedDocumentTypes.map((docType) => (
-                                        <tr key={docType.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-100">
+                                        <ResponsiveTableRow key={docType.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-100">
                                             {editingDocType === docType.id ? (
                                                 <>
-                                                    <td className="px-6 py-4">
+                                                    <ResponsiveTableCell label="Name">
                                                         <input type="text" value={data.name} onChange={(e) => setData('name', e.target.value)} className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
                                                         {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                                                    </td>
-                                                    <td className="px-6 py-4">
+                                                    </ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Description">
                                                         <input type="text" value={data.description} onChange={(e) => setData('description', e.target.value)} className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
                                                         {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                        <div className="flex items-center space-x-2">
+                                                    </ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Actions" nowrap className="font-medium" contentClassName="flex justify-end">
+                                                        <div className="flex items-center justify-end space-x-2">
                                                             <button onClick={handleUpdate} disabled={processing} className="flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50">
                                                                 <SaveIcon /> <span className="ml-1">Save</span>
                                                             </button>
@@ -317,14 +326,14 @@ export default function Documents() {
                                                                 <CancelIcon /> <span className="ml-1">Cancel</span>
                                                             </button>
                                                         </div>
-                                                    </td>
+                                                    </ResponsiveTableCell>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800 text-sm">{docType.name}</td>
-                                                    <td className="px-6 py-4 text-gray-600 text-sm">{docType.description}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                        <div className="flex items-center space-x-2">
+                                                    <ResponsiveTableCell label="Name" nowrap className="font-medium text-gray-800">{docType.name}</ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Description" className="text-gray-600">{docType.description}</ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Actions" nowrap className="font-medium" contentClassName="flex justify-end">
+                                                        <div className="flex items-center justify-end space-x-2">
                                                             <button id={`edit-doc-btn-${docType.id}`} onClick={() => handleEditClick(docType)} className="flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-md hover:bg-blue-700 transition-colors">
                                                                 <EditIcon /> <span className="ml-1">Edit</span>
                                                             </button>
@@ -332,13 +341,13 @@ export default function Documents() {
                                                                 <ArchiveIcon /> <span className="ml-1">Archive</span>
                                                             </button>
                                                         </div>
-                                                    </td>
+                                                    </ResponsiveTableCell>
                                                 </>
                                             )}
-                                        </tr>
+                                        </ResponsiveTableRow>
                                     ))}
-                                </tbody>
-                            </table>
+                                </ResponsiveTableBody>
+                            </ResponsiveTable>
                         </div>
                     </div>
                 </div>
@@ -348,36 +357,34 @@ export default function Documents() {
                 {isLoadingModal ? (
                     <p className="text-center text-gray-500">Loading...</p>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                           <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Archived By</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                           <tbody className="bg-white divide-y divide-gray-200">
-                                {archivedDocs.length > 0 ? (
-                                    archivedDocs.map(doc => (
-                                        <tr key={doc.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">{doc.name}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {doc.archived_by ? doc.archived_by.full_name : 'N/A'}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <button onClick={() => handleRestore(doc)} className="flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-xs font-bold rounded-md hover:bg-green-200 transition-colors">
-                                                    <RestoreIcon /> <span className="ml-1">Restore</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr><td colSpan="3" className="px-6 py-4 text-center text-gray-500">No archived documents found.</td></tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                    <ResponsiveTable>
+                        <ResponsiveTableHead className="bg-gray-50 text-gray-500">
+                            <tr>
+                                <ResponsiveTableHeaderCell>Name</ResponsiveTableHeaderCell>
+                                <ResponsiveTableHeaderCell>Archived By</ResponsiveTableHeaderCell>
+                                <ResponsiveTableHeaderCell>Actions</ResponsiveTableHeaderCell>
+                            </tr>
+                        </ResponsiveTableHead>
+                        <ResponsiveTableBody className="md:bg-white md:divide-y md:divide-gray-200">
+                            {archivedDocs.length > 0 ? (
+                                archivedDocs.map(doc => (
+                                    <ResponsiveTableRow key={doc.id}>
+                                        <ResponsiveTableCell label="Name" nowrap className="font-medium text-gray-800">{doc.name}</ResponsiveTableCell>
+                                        <ResponsiveTableCell label="Archived By" nowrap className="text-gray-500">
+                                            {doc.archived_by ? doc.archived_by.full_name : 'N/A'}
+                                        </ResponsiveTableCell>
+                                        <ResponsiveTableCell label="Actions" nowrap contentClassName="flex justify-end md:justify-start">
+                                            <button onClick={() => handleRestore(doc)} className="flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-xs font-bold rounded-md hover:bg-green-200 transition-colors">
+                                                <RestoreIcon /> <span className="ml-1">Restore</span>
+                                            </button>
+                                        </ResponsiveTableCell>
+                                    </ResponsiveTableRow>
+                                ))
+                            ) : (
+                                <ResponsiveTableEmpty colSpan="3">No archived documents found.</ResponsiveTableEmpty>
+                            )}
+                        </ResponsiveTableBody>
+                    </ResponsiveTable>
                 )}
             </Modal>
         </AuthenticatedLayout>

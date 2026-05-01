@@ -8,6 +8,15 @@ import 'driver.js/dist/driver.css';
 import EditUserModal from '@/Components/EditUserModal'; 
 import VerificationModal from '@/Components/VerificationModal';
 import { CheckCircle, Clock, XCircle, Edit, HelpCircle, Loader2 } from 'lucide-react';
+import {
+    ResponsiveTable,
+    ResponsiveTableBody,
+    ResponsiveTableCell,
+    ResponsiveTableEmpty,
+    ResponsiveTableHead,
+    ResponsiveTableHeaderCell,
+    ResponsiveTableRow,
+} from '@/Components/ResponsiveTable';
 
 const roleBadgeClasses = {
     resident: 'bg-blue-50 text-blue-600 ring-blue-500/10',
@@ -172,16 +181,6 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
 
     return (
         <>
-            <style>{`
-                @media (max-width: 767px) {
-                    .responsive-table thead { display: none; }
-                    .responsive-table tr { display: block; margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
-                    .responsive-table td { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; text-align: right; }
-                    .responsive-table td:last-child { border-bottom: none; }
-                    .responsive-table td::before { content: attr(data-label); font-weight: 600; text-align: left; margin-right: 1rem; }
-                }
-            `}</style>
-
             <AuthenticatedLayout user={auth.user}>
                 <Head title="User Management" />
 
@@ -227,29 +226,29 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                             </div>
 
                             <div id="user-table" className="p-4 md:p-0">
-                                <table className="min-w-full responsive-table">
-                                    <thead className="bg-blue-600 text-white">
+                                <ResponsiveTable>
+                                    <ResponsiveTableHead>
                                         <tr>
-                                            <th scope="col" onClick={() => handleSort('full_name')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Name</th>
-                                            <th scope="col" onClick={() => handleSort('email')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Email</th>
-                                            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Barangay</th>
-                                            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Role</th>
-                                            <th scope="col" onClick={() => handleSort('created_at')} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-blue-700">Registered On</th>
-                                            <th scope="col" className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Verification</th>
+                                            <ResponsiveTableHeaderCell onClick={() => handleSort('full_name')} className="py-4 cursor-pointer hover:bg-blue-700">Name</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell onClick={() => handleSort('email')} className="py-4 cursor-pointer hover:bg-blue-700">Email</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell className="py-4">Barangay</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell className="py-4">Role</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell onClick={() => handleSort('created_at')} className="py-4 cursor-pointer hover:bg-blue-700">Registered On</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell className="py-4">Verification</ResponsiveTableHeaderCell>
                                             {/* Show Actions header for Admin AND Super Admin */}
                                             {hasWriteAccess && (
-                                                <th scope="col" className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider">Actions</th>
+                                                <ResponsiveTableHeaderCell className="py-4 text-center">Actions</ResponsiveTableHeaderCell>
                                             )}
                                         </tr>
-                                    </thead>
-                                    <tbody className="bg-white">
+                                    </ResponsiveTableHead>
+                                    <ResponsiveTableBody className="md:bg-white">
                                         {localUsers.length > 0 ? (
                                             localUsers.map((user) => (
-                                                <tr key={user.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-50 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
-                                                    <td data-label="Name" className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.full_name}</td>
-                                                    <td data-label="Email" className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
-                                                    <td data-label="Barangay" className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"><UserLocation user={user} /></td>
-                                                    <td data-label="Role" className="px-6 py-4 whitespace-nowrap text-sm">
+                                                <ResponsiveTableRow key={user.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-50 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
+                                                    <ResponsiveTableCell label="Name" nowrap className="font-medium text-gray-900">{user.full_name}</ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Email" nowrap className="text-gray-600">{user.email}</ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Barangay" nowrap className="text-gray-600"><UserLocation user={user} /></ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Role" nowrap>
                                                         {updatingUserRole === user.id ? <LoadingSpinner /> : (
                                                             <>
                                                                 {/* Super Admin can change roles for non-super-admins */}
@@ -270,13 +269,13 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                                                 )}
                                                             </>
                                                         )}
-                                                    </td>
-                                                    <td data-label="Registered On" className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{new Date(user.created_at).toLocaleDateString()}</td>
-                                                    <td data-label="Verification" className="px-6 py-4 whitespace-nowrap text-sm"><VerificationStatusBadge status={user.verification_status} /></td>
+                                                    </ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Registered On" nowrap className="text-gray-600">{new Date(user.created_at).toLocaleDateString()}</ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Verification" nowrap><VerificationStatusBadge status={user.verification_status} /></ResponsiveTableCell>
                                                     
                                                     {/* Actions cell for Admin AND Super Admin */}
                                                     {hasWriteAccess && (
-                                                        <td data-label="Actions" className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        <ResponsiveTableCell label="Actions" nowrap className="font-medium" contentClassName="flex justify-end">
                                                             <div className="flex items-center justify-end space-x-2">
                                                                 <button 
                                                                     onClick={() => handleOpenVerificationModal(user)} 
@@ -292,23 +291,21 @@ export default function UserManagement({ auth, users: initialUsers, filters }) {
                                                                     <Edit size={12} className="mr-1"/> Edit
                                                                 </button>
                                                             </div>
-                                                        </td>
+                                                        </ResponsiveTableCell>
                                                     )}
-                                                </tr>
+                                                </ResponsiveTableRow>
                                             ))
                                         ) : (
-                                            <tr>
-                                                <td colSpan={hasWriteAccess ? 7 : 6} className="px-6 py-12 text-center text-gray-500 bg-gray-50">
-                                                    <div className="flex flex-col items-center justify-center">
-                                                        <HelpCircle className="h-12 w-12 text-gray-300 mb-2" />
-                                                        <p className="text-lg font-medium text-gray-900">No users found</p>
-                                                        <p className="text-sm text-gray-500">Try adjusting your search or filters.</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            <ResponsiveTableEmpty colSpan={hasWriteAccess ? 7 : 6} className="bg-gray-50">
+                                                <div className="flex flex-col items-center justify-center">
+                                                    <HelpCircle className="h-12 w-12 text-gray-300 mb-2" />
+                                                    <p className="text-lg font-medium text-gray-900">No users found</p>
+                                                    <p className="text-sm text-gray-500">Try adjusting your search or filters.</p>
+                                                </div>
+                                            </ResponsiveTableEmpty>
                                         )}
-                                    </tbody>
-                                </table>
+                                    </ResponsiveTableBody>
+                                </ResponsiveTable>
                             </div>
 
                             <div id="user-pagination" className="p-6 flex justify-between items-center text-sm text-gray-600 border-t border-gray-200">

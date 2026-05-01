@@ -6,9 +6,17 @@ import clsx from 'clsx';
 import { motion } from 'framer-motion';
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import {
+    ResponsiveTable,
+    ResponsiveTableBody,
+    ResponsiveTableCell,
+    ResponsiveTableHead,
+    ResponsiveTableHeaderCell,
+    ResponsiveTableRow,
+} from '@/Components/ResponsiveTable';
 
 // Icons
-import { Search, DollarSign, FileText, CalendarDays, Eye, FileQuestion, X, CheckCircle2, UserCheck, HelpCircle } from 'lucide-react';
+import { Search, DollarSign, FileText, Eye, FileQuestion, X, CheckCircle2, HelpCircle } from 'lucide-react';
 
 const StatusBadge = ({ status }) => {
     // Since only 'Paid' is shown, this could be simplified, but keeping it is fine.
@@ -95,62 +103,56 @@ export default function Payment({ payments = { data: [], links: [] }, filters = 
                         
                         <motion.div id="payment-list-container" variants={containerVariants} initial="hidden" animate="visible">
                             {paymentData.length > 0 ? (
-                                <>
-                                    <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700">
+                                <ResponsiveTable>
+                                    <ResponsiveTableHead>
+                                        <tr>
+                                            <ResponsiveTableHeaderCell>Requestor</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell>Document</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell>Amount</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell>Status</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell>Date</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell>Processed By</ResponsiveTableHeaderCell>
+                                            <ResponsiveTableHeaderCell className="text-center">Receipt</ResponsiveTableHeaderCell>
+                                        </tr>
+                                    </ResponsiveTableHead>
+                                    <ResponsiveTableBody className="md:bg-white md:dark:bg-slate-800 md:divide-y md:divide-slate-200 md:dark:divide-slate-700">
                                         {paymentData.map((payment, index) => (
-                                            <motion.div variants={itemVariants} key={payment.id} className="p-4 space-y-3">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <div className="font-bold text-gray-900 dark:text-white">{payment.requestor_name}</div>
-                                                        <div className="text-sm text-slate-500">{payment.document_name}</div>
-                                                    </div>
+                                            <ResponsiveTableRow
+                                                as={motion.tr}
+                                                variants={itemVariants}
+                                                key={payment.id}
+                                                className="odd:bg-white even:bg-slate-100 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20"
+                                            >
+                                                <ResponsiveTableCell label="Requestor" nowrap className="font-medium text-gray-900 dark:text-white">
+                                                    {payment.requestor_name}
+                                                </ResponsiveTableCell>
+                                                <ResponsiveTableCell label="Document" nowrap className="text-slate-500 dark:text-slate-300">
+                                                    {payment.document_name}
+                                                </ResponsiveTableCell>
+                                                <ResponsiveTableCell label="Amount" nowrap className="font-semibold text-gray-800 dark:text-gray-200">
+                                                    PHP {Number(payment.amount).toFixed(2)}
+                                                </ResponsiveTableCell>
+                                                <ResponsiveTableCell label="Status" nowrap className="text-slate-500 dark:text-slate-300">
                                                     <StatusBadge status={payment.status} />
-                                                </div>
-                                                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1.5 border-t border-slate-100 dark:border-slate-700 pt-3">
-                                                    <p className="flex justify-between items-center"><span className='flex items-center gap-2'><DollarSign size={14} /> Amount</span> <span className='font-semibold'>₱{Number(payment.amount).toFixed(2)}</span></p>
-                                                    <p className="flex justify-between items-center"><span className='flex items-center gap-2'><CalendarDays size={14} /> Date</span> <span>{payment.date}</span></p>
-                                                    <p className="flex justify-between items-center"><span className='flex items-center gap-2'><UserCheck size={14} /> Processed By</span> <span>{payment.processed_by || 'N/A'}</span></p>
-                                                </div>
-                                                {payment.payment_receipt_url && (<button id={index === 0 ? 'first-receipt-button' : undefined} onClick={() => openReceiptModal(payment)} className="w-full flex justify-center items-center gap-2 text-center mt-2 p-2 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900"><Eye size={16}/> View Receipt</button>)}
-                                            </motion.div>
+                                                </ResponsiveTableCell>
+                                                <ResponsiveTableCell label="Date" nowrap className="text-slate-500 dark:text-slate-300">
+                                                    {payment.date}
+                                                </ResponsiveTableCell>
+                                                <ResponsiveTableCell label="Processed By" nowrap className="text-slate-500 dark:text-slate-300">
+                                                    {payment.processed_by || 'N/A'}
+                                                </ResponsiveTableCell>
+                                                <ResponsiveTableCell id="receipt-buttons" label="Receipt" nowrap className="text-center" contentClassName="flex justify-end md:justify-center">
+                                                    {payment.payment_receipt_url && (
+                                                        <button id={index === 0 ? 'first-receipt-button' : undefined} onClick={() => openReceiptModal(payment)} className="inline-flex items-center gap-2 rounded-lg bg-blue-50 p-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-400 dark:hover:bg-blue-900 md:rounded-full">
+                                                            <Eye className="w-5 h-5" />
+                                                            <span className="md:hidden">View Receipt</span>
+                                                        </button>
+                                                    )}
+                                                </ResponsiveTableCell>
+                                            </ResponsiveTableRow>
                                         ))}
-                                    </div>
-                                    
-                                    <div className="hidden md:block overflow-x-auto">
-                                        <table className="min-w-full">
-                                            <thead className="bg-blue-600 text-white">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold  dark:text-slate-300 uppercase">Requestor</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold  dark:text-slate-300 uppercase">Document</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold  dark:text-slate-300 uppercase">Amount</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold  dark:text-slate-300 uppercase">Status</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold  dark:text-slate-300 uppercase">Date</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold  dark:text-slate-300 uppercase">Processed By</th>
-                                                    <th className="px-6 py-3 text-center text-xs font-bold  dark:text-slate-300 uppercase">Receipt</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                                                {paymentData.map((payment, index) => (
-                                                    <motion.tr variants={itemVariants} key={payment.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                                            {payment.requestor_name}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-300">{payment.document_name}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800 dark:text-gray-200">₱{Number(payment.amount).toFixed(2)}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-300">
-                                                            <StatusBadge status={payment.status} />
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-300">{payment.date}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-300">{payment.processed_by || 'N/A'}</td>
-                                                        <td id="receipt-buttons" className="px-6 py-4 whitespace-nowrap text-center">
-                                                            {payment.payment_receipt_url && (<button id={index === 0 ? 'first-receipt-button' : undefined} onClick={() => openReceiptModal(payment)} className="p-2 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded-full transition"><Eye className="w-5 h-5" /></button>)}
-                                                        </td>
-                                                    </motion.tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </>
+                                    </ResponsiveTableBody>
+                                </ResponsiveTable>
                             ) : (
                                 <div className="text-center py-20"><FileQuestion className="mx-auto h-16 w-16 text-slate-400" /><h3 className="mt-4 text-lg font-medium text-slate-900 dark:text-white">No Paid Transactions Found</h3><p className="mt-2 text-sm text-slate-500">There are no completed payments to show yet.</p></div>
                             )}

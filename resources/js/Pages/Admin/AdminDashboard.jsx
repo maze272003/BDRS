@@ -5,9 +5,18 @@ import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { 
     Users, FolderGit2, Megaphone, PlusCircle, History, Banknote, 
-    MessageSquare, FilePlus, CheckCircle, XCircle, Eye, Building, FileText, HelpCircle // 1. I-IMPORT ANG HELP ICON
+    FilePlus, CheckCircle, XCircle, Eye, Building, FileText, HelpCircle // 1. I-IMPORT ANG HELP ICON
 } from 'lucide-react';
 import SystemStatus from '@/Components/SystemStatus';
+import {
+    ResponsiveTable,
+    ResponsiveTableBody,
+    ResponsiveTableCell,
+    ResponsiveTableEmpty,
+    ResponsiveTableHead,
+    ResponsiveTableHeaderCell,
+    ResponsiveTableRow,
+} from '@/Components/ResponsiveTable';
 
 // 2. I-IMPORT ANG DRIVER.JS
 import { driver } from "driver.js";
@@ -146,30 +155,40 @@ export default function AdminDashboard({
 
                         <motion.div variants={itemVariants} className="bg-white/70 dark:bg-gray-800/60 backdrop-blur-sm p-6 rounded-2xl shadow-lg" id="pending-requests-card">
                              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 text-lg">Action Required: Pending Requests</h3>
-                             <div className="overflow-x-auto">
-                                 <table className="w-full text-left">
-                                     <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase">
-                                         <tr>
-                                             <th className="py-3 px-4">Resident</th>
-                                             <th className="py-3 px-4">Document</th>
-                                             <th className="py-3 px-4">Date</th>
-                                             <th className="py-3 px-4 text-center">Actions</th>
-                                         </tr>
-                                     </thead>
-                                     <tbody>
-                                         {pendingRequests.map(req => (
-                                             <tr key={req.id} className="border-t border-gray-200 dark:border-gray-700">
-                                                 <td className="py-3 px-4 font-medium text-gray-800 dark:text-gray-200">{req.name}</td>
-                                                 <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300">{req.docType}</td>
-                                                 <td className="py-3 px-4 text-sm text-gray-500 dark:text-gray-400">{req.date}</td>
-                                                 <td className="py-3 px-4 text-center">
-                                                     <Link href={route('admin.request')} className="p-2 text-gray-500 hover:text-blue-600 transition-colors"><Eye size={16}/></Link>
-                                                 </td>
-                                             </tr>
-                                         ))}
-                                     </tbody>
-                                 </table>
-                             </div>
+                             <ResponsiveTable>
+                                 <ResponsiveTableHead className="bg-transparent text-gray-500 dark:text-gray-400">
+                                     <tr>
+                                         <ResponsiveTableHeaderCell>Resident</ResponsiveTableHeaderCell>
+                                         <ResponsiveTableHeaderCell>Document</ResponsiveTableHeaderCell>
+                                         <ResponsiveTableHeaderCell>Date</ResponsiveTableHeaderCell>
+                                         <ResponsiveTableHeaderCell className="text-center">Actions</ResponsiveTableHeaderCell>
+                                     </tr>
+                                 </ResponsiveTableHead>
+                                 <ResponsiveTableBody>
+                                     {pendingRequests.length > 0 ? pendingRequests.map(req => (
+                                         <ResponsiveTableRow key={req.id} className="md:border-t md:border-gray-200 md:dark:border-gray-700">
+                                             <ResponsiveTableCell label="Resident" className="font-medium text-gray-800 dark:text-gray-200">
+                                                 {req.name}
+                                             </ResponsiveTableCell>
+                                             <ResponsiveTableCell label="Document" className="text-gray-600 dark:text-gray-300">
+                                                 {req.docType}
+                                             </ResponsiveTableCell>
+                                             <ResponsiveTableCell label="Date" className="text-gray-500 dark:text-gray-400">
+                                                 {req.date}
+                                             </ResponsiveTableCell>
+                                             <ResponsiveTableCell label="Actions" className="md:text-center" contentClassName="flex justify-end md:justify-center">
+                                                 <Link href={route('admin.request')} className="inline-flex rounded-md p-2 text-gray-500 transition-colors hover:text-blue-600">
+                                                     <Eye size={16}/>
+                                                 </Link>
+                                             </ResponsiveTableCell>
+                                         </ResponsiveTableRow>
+                                     )) : (
+                                         <ResponsiveTableEmpty colSpan="4">
+                                             No pending requests found.
+                                         </ResponsiveTableEmpty>
+                                     )}
+                                 </ResponsiveTableBody>
+                             </ResponsiveTable>
                         </motion.div>
                     </div>
 

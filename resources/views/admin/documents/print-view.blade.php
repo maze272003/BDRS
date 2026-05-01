@@ -47,6 +47,55 @@
             return IconComponent ? <IconComponent className={`lucide ${className}`} size={size} /> : null;
         };
 
+        const classNames = (...classes) => classes.filter(Boolean).join(' ');
+
+        const ResponsiveTable = ({ children, className = '', wrapperClassName = '' }) => (
+            <div className={classNames('w-full overflow-hidden md:overflow-x-auto', wrapperClassName)}>
+                <table className={classNames('w-full border-separate border-spacing-y-3 md:min-w-full md:border-collapse md:border-spacing-0', className)}>
+                    {children}
+                </table>
+            </div>
+        );
+
+        const ResponsiveTableHead = ({ children, className = '' }) => (
+            <thead className={classNames('hidden bg-blue-600/90 text-white dark:bg-blue-800/50 md:table-header-group', className)}>
+                {children}
+            </thead>
+        );
+
+        const ResponsiveTableBody = ({ children, className = '' }) => (
+            <tbody className={classNames('block md:table-row-group', className)}>
+                {children}
+            </tbody>
+        );
+
+        const ResponsiveTableRow = ({ children, className = '' }) => (
+            <tr className={classNames('mb-3 block overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm md:mb-0 md:table-row md:overflow-visible md:rounded-none md:border-0 md:shadow-none', className)}>
+                {children}
+            </tr>
+        );
+
+        const ResponsiveTableHeaderCell = ({ children, className = '' }) => (
+            <th scope="col" className={classNames('px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider', className)}>
+                {children}
+            </th>
+        );
+
+        const ResponsiveTableCell = ({ children, label, className = '', contentClassName = '', nowrap = false }) => (
+            <td
+                data-label={label}
+                className={classNames(
+                    'flex items-start justify-between gap-4 border-b border-slate-100 px-4 py-3 text-right text-sm last:border-b-0 before:mr-4 before:min-w-24 before:flex-shrink-0 before:text-left before:text-xs before:font-semibold before:uppercase before:tracking-wide before:text-slate-500 before:content-[attr(data-label)] md:table-cell md:border-b-0 md:px-6 md:py-4 md:text-left md:align-middle md:before:content-none',
+                    nowrap && 'md:whitespace-nowrap',
+                    className,
+                )}
+            >
+                <div className={classNames('min-w-0 flex-1 md:block', contentClassName)}>
+                    {children}
+                </div>
+            </td>
+        );
+
         const Modal = ({ children, show, onClose, title, maxWidth = '4xl' }) => {
             useEffect(() => {
                 const handleEsc = (event) => { if (event.keyCode === 27) onClose(); };
@@ -161,39 +210,39 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                        <thead className="bg-blue-600/90 text-white dark:bg-blue-800/50">
+                                <div className="p-4 md:p-0">
+                                    <ResponsiveTable>
+                                        <ResponsiveTableHead>
                                             <tr>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase">Requestor</th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase">Document</th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase">Status</th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase">Date</th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase">Actions</th>
+                                                <ResponsiveTableHeaderCell>Requestor</ResponsiveTableHeaderCell>
+                                                <ResponsiveTableHeaderCell>Document</ResponsiveTableHeaderCell>
+                                                <ResponsiveTableHeaderCell>Status</ResponsiveTableHeaderCell>
+                                                <ResponsiveTableHeaderCell>Date</ResponsiveTableHeaderCell>
+                                                <ResponsiveTableHeaderCell>Actions</ResponsiveTableHeaderCell>
                                             </tr>
-                                        </thead>
-                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        </ResponsiveTableHead>
+                                        <ResponsiveTableBody className="md:bg-white md:dark:bg-gray-800 md:divide-y md:divide-gray-200 md:dark:divide-gray-700">
                                             {requests.map((request) => (
-                                                <tr key={request.id} className="odd:bg-white even:bg-slate-50 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{request.user.full_name}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{request.document_type.name}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={request.status} /></td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{new Date(request.created_at).toLocaleDateString()}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                        <div className="flex items-center gap-2">
+                                                <ResponsiveTableRow key={request.id} className="odd:bg-white even:bg-slate-50 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
+                                                    <ResponsiveTableCell label="Requestor" nowrap className="font-medium text-gray-900 dark:text-white">{request.user.full_name}</ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Document" nowrap className="text-gray-500 dark:text-gray-300">{request.document_type.name}</ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Status" nowrap><StatusBadge status={request.status} /></ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Date" nowrap className="text-gray-500 dark:text-gray-300">{new Date(request.created_at).toLocaleDateString()}</ResponsiveTableCell>
+                                                    <ResponsiveTableCell label="Actions" nowrap className="font-medium" contentClassName="flex justify-end md:justify-start">
+                                                        <div className="flex w-full flex-col items-stretch gap-2 md:w-auto md:flex-row md:items-center">
                                                             <select value={request.status} onChange={(e) => handleStatusChange(request.id, e.target.value)} className="w-full text-xs border-gray-300 rounded-md py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
                                                                 <option value={request.status} disabled>{request.status}</option>
                                                                 {['Pending', 'Processing', 'Ready to Pickup', 'Claimed', 'Rejected'].filter(s => s !== request.status).map(s => <option key={s} value={s}>{s}</option>)}
                                                             </select>
                                                             {request.status === 'Processing' && (
-                                                                <button onClick={() => handlePrintClick(request)} title="Generate & Print PDF" className="p-2 text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 rounded-md transition"><Icon name="Printer" /></button>
+                                                                <button onClick={() => handlePrintClick(request)} title="Generate & Print PDF" className="inline-flex justify-center rounded-md p-2 text-gray-600 transition hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"><Icon name="Printer" /></button>
                                                             )}
                                                         </div>
-                                                    </td>
-                                                </tr>
+                                                    </ResponsiveTableCell>
+                                                </ResponsiveTableRow>
                                             ))}
-                                        </tbody>
-                                    </table>
+                                        </ResponsiveTableBody>
+                                    </ResponsiveTable>
                                 </div>
                             </div>
                         </div>

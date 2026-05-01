@@ -8,6 +8,15 @@ import { toast, Toaster } from 'react-hot-toast';
 // --- DRIVER.JS IMPORTS ---
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import {
+    ResponsiveTable,
+    ResponsiveTableBody,
+    ResponsiveTableCell,
+    ResponsiveTableEmpty,
+    ResponsiveTableHead,
+    ResponsiveTableHeaderCell,
+    ResponsiveTableRow,
+} from '@/Components/ResponsiveTable';
 
 // --- ICONS ---
 import { Search, History as HistoryIcon, User, FileText, CalendarDays, HelpCircle, FileQuestion, MessageSquare, RotateCcw, AlertTriangle } from 'lucide-react';
@@ -184,88 +193,62 @@ export default function History() {
                             </div>
                         </div>
                         
-                        <div id="history-list-container">
-                            <div className="md:hidden">
-                                {archives.data.length > 0 ? archives.data.map(archive => (
-                                    <div key={archive.id} className="border-b dark:border-gray-700 p-4 space-y-3">
-                                        <div className="flex justify-between items-start">
-                                            <div className="font-bold text-gray-900 dark:text-white">{archive.user?.full_name || 'N/A'}</div>
-                                            <StatusBadge status={archive.status} />
-                                        </div>
-                                        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                                            <p><span className="font-semibold">Document:</span> {archive.document_type?.name}</p>
-                                            <p><span className="font-semibold">Archived:</span> {new Date(archive.original_created_at || archive.created_at).toLocaleDateString()}</p>
-                                            <p><span className="font-semibold">Processed by:</span> {archive.processor?.full_name || 'N/A'}</p>
-                                            <p className="italic"><span className="font-semibold">Remarks:</span> {archive.admin_remarks || '-'}</p>
-                                        </div>
-                                        {archive.status === 'Rejected' && (
-                                            <div className="pt-3 border-t dark:border-gray-600">
-                                                <button 
-                                                    onClick={() => handleRestoreClick(archive)}
-                                                    className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900"
-                                                >
-                                                    <RotateCcw size={16} />
-                                                    Restore Request
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )) : (
-                                    <div className="text-center py-16">
-                                        <FileQuestion className="mx-auto h-12 w-12 text-gray-400" />
-                                        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No Archived Records Found</h3>
-                                    </div>
-                                )}
-                            </div>
-                            
-                            <div className="hidden md:block overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead className="bg-blue-600 text-white">
-                                        <tr>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold dark:text-gray-300 uppercase tracking-wider">Requestor</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold dark:text-gray-300 uppercase tracking-wider">Document</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold dark:text-gray-300 uppercase tracking-wider">Final Status</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold dark:text-gray-300 uppercase tracking-wider">Remarks</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold dark:text-gray-300 uppercase tracking-wider">Date Archived</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold dark:text-gray-300 uppercase tracking-wider">Processed By</th>
-                                            <th scope="col" className="px-6 py-3 text-center text-xs font-bold dark:text-gray-300 uppercase tracking-wider">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {archives.data.length > 0 ? archives.data.map(archive => (
-                                            <tr key={archive.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{archive.user?.full_name || 'N/A'}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{archive.document_type?.name}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={archive.status} /></td>
-                                                <td className="px-6 py-4 whitespace-normal text-sm text-gray-500 dark:text-gray-300 max-w-xs italic">{archive.admin_remarks || '-'}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{new Date(archive.original_created_at || archive.created_at).toLocaleDateString()}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{archive.processor?.full_name || 'N/A'}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                    {archive.status === 'Rejected' && (
-                                                        <button 
-                                                            onClick={() => handleRestoreClick(archive)}
-                                                            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900"
-                                                            title="Restore this request"
-                                                        >
-                                                            <RotateCcw size={14} />
-                                                            Restore
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        )) : (
-                                            <tr>
-                                                <td colSpan="7" className="text-center py-16">
-                                                    <FileQuestion className="mx-auto h-12 w-12 text-gray-400" />
-                                                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No Archived Records Found</h3>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div id="history-list-container" className="p-4 md:p-0">
+                            <ResponsiveTable>
+                                <ResponsiveTableHead>
+                                    <tr>
+                                        <ResponsiveTableHeaderCell>Requestor</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell>Document</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell>Final Status</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell>Remarks</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell>Date Archived</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell>Processed By</ResponsiveTableHeaderCell>
+                                        <ResponsiveTableHeaderCell className="text-center">Action</ResponsiveTableHeaderCell>
+                                    </tr>
+                                </ResponsiveTableHead>
+                                <ResponsiveTableBody className="md:bg-white md:dark:bg-gray-800 md:divide-y md:divide-gray-200 md:dark:divide-gray-700">
+                                    {archives.data.length > 0 ? archives.data.map(archive => (
+                                        <ResponsiveTableRow key={archive.id} className="odd:bg-white even:bg-slate-100 hover:bg-sky-100 dark:odd:bg-gray-800 dark:even:bg-gray-900/50 dark:hover:bg-sky-900/20">
+                                            <ResponsiveTableCell label="Requestor" nowrap className="font-medium text-gray-900 dark:text-white">
+                                                {archive.user?.full_name || 'N/A'}
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Document" nowrap className="text-gray-500 dark:text-gray-300">
+                                                {archive.document_type?.name}
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Final Status" nowrap>
+                                                <StatusBadge status={archive.status} />
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Remarks" className="max-w-xs text-gray-500 dark:text-gray-300 italic">
+                                                {archive.admin_remarks || '-'}
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Date Archived" nowrap className="text-gray-500 dark:text-gray-300">
+                                                {new Date(archive.original_created_at || archive.created_at).toLocaleDateString()}
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Processed By" nowrap className="text-gray-500 dark:text-gray-300">
+                                                {archive.processor?.full_name || 'N/A'}
+                                            </ResponsiveTableCell>
+                                            <ResponsiveTableCell label="Action" nowrap className="text-center" contentClassName="flex justify-end md:justify-center">
+                                                {archive.status === 'Rejected' && (
+                                                    <button
+                                                        onClick={() => handleRestoreClick(archive)}
+                                                        className="inline-flex items-center gap-2 rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-800 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900"
+                                                        title="Restore this request"
+                                                    >
+                                                        <RotateCcw size={14} />
+                                                        Restore
+                                                    </button>
+                                                )}
+                                            </ResponsiveTableCell>
+                                        </ResponsiveTableRow>
+                                    )) : (
+                                        <ResponsiveTableEmpty colSpan="7">
+                                            <FileQuestion className="mx-auto h-12 w-12 text-gray-400" />
+                                            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No Archived Records Found</h3>
+                                        </ResponsiveTableEmpty>
+                                    )}
+                                </ResponsiveTableBody>
+                            </ResponsiveTable>
                         </div>
-                        
                         <div id="history-pagination" className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 dark:border-gray-700 gap-4">
                             <p className="text-sm text-gray-700 dark:text-gray-400">
                                 Showing <span className="font-medium">{archives.from || 0}</span> to <span className="font-medium">{archives.to || 0}</span> of <span className="font-medium">{archives.total || 0}</span> results
